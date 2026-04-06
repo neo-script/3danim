@@ -1,97 +1,68 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-// Setup Constants
-const GRID_SIZE = 36;
-const GRID_SPACING = 1;
+const size = 36;
+const thickness = 0.1; // Adjust this for even thicker lines
 
-// Scene Initialization
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x020205); // Deep midnight blue-black
+scene.background = new THREE.Color(0x020205);
 
-// Camera Setup
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.set(25, 25, 25);
+const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.set(45, 35, 45);
 
-// Renderer
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setPixelRatio(window.devicePixelRatio);
 document.body.appendChild(renderer.domElement);
 
-// Controls
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
-controls.dampingFactor = 0.05;
 
 /**
- * Minimalist Grid Construction
- * Creates a base floor and a single vertical "Height" axis.
+ * THICK GRID GENERATION
+ * Instead of THREE.Line, we use thin Boxes for guaranteed thickness
  */
-function createSimplifiedGrid(size, spacing) {
+function createThickGrid(size, spacing) {
     const group = new THREE.Group();
-    const halfSize = (size * spacing) / 2;
+    const material = new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.6 });
+    const halfSize = size / 2;
 
-    // High-visibility materials
-    const gridMat = new THREE.LineBasicMaterial({ 
-        color: 0x00ffff, // Cyan Neon
-        transparent: true, 
-        opacity: 0.5 
-    });
-    
-    const axisMat = new THREE.LineBasicMaterial({ 
-        color: 0xff00ff, // Magenta Neon for the height edge
-        linewidth: 2 
-    });
-
-    const floorPoints = [];
-
-    // Create Floor Grid (XZ Plane)
     for (let i = 0; i <= size; i++) {
         const pos = i * spacing - halfSize;
-        
-        // Lines along X
-        floorPoints.push(new THREE.Vector3(-halfSize, 0, pos), new THREE.Vector3(halfSize, 0, pos));
-        // Lines along Z
-        floorPoints.push(new THREE.Vector3(pos, 0, -halfSize), new THREE.Vector3(pos, 0, halfSize));
+
+        // X-axis beams
+        const geomX = new THREE.BoxGeometry(size, thickness, thickness);
+        const meshX = new THREE.Mesh(geomX, material);
+        meshX.position.set(0, 0, pos);
+        group.add(meshX);
+
+        // Z-axis beams
+        const geomZ = new THREE.BoxGeometry(thickness, thickness, size);
+        const meshZ = new THREE.Mesh(geomZ, material);
+        meshZ.position.set(pos, 0, 0);
+        group.add(meshZ);
     }
-
-    const floorGeom = new THREE.BufferGeometry().setFromPoints(floorPoints);
-    const floorGrid = new THREE.LineSegments(floorGeom, gridMat);
-    group.add(floorGrid);
-
-    // Create Single Height Edge (Vertical Axis at the center-back)
-    const heightPoints = [
-        new THREE.Vector3(-halfSize, 0, -halfSize), 
-        new THREE.Vector3(-halfSize, size, -halfSize)
-    ];
-    
-    const heightGeom = new THREE.BufferGeometry().setFromPoints(heightPoints);
-    const heightEdge = new THREE.Line(heightGeom, axisMat);
-    group.add(heightEdge);
-
     return group;
 }
 
-const customGrid = createSimplifiedGrid(GRID_SIZE, GRID_SPACING);
-scene.add(customGrid);
+scene.add(createThickGrid(size, 1));
 
-// Add a soft ambient light to ensure the space feels 3D
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
-scene.add(ambientLight);
+// SINGLE THICK HEIGHT EDGE
+const heightGeom = new THREE.BoxGeometry(thickness * 2, size, thickness * 2);
+const heightMat = new THREE.MeshBasicMaterial({ color: 0xff00ff });
+const heightEdge = new THREE.Mesh(heightGeom, heightMat);
+// Positioned at the corner (back-left)
+heightEdge.position.set(-size/2, size/2, -size/2); 
+scene.add(heightEdge);
 
-// Window Resize Handling
-window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-});
-
-// Animation Loop
 function animate() {
     requestAnimationFrame(animate);
     controls.update();
     renderer.render(scene, camera);
 }
-
 animate();
+
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+});

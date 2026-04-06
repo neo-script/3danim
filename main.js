@@ -7,11 +7,11 @@ const GRID_SPACING = 1;
 
 // Scene Initialization
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x050505);
+scene.background = new THREE.Color(0x020205); // Deep midnight blue-black
 
 // Camera Setup
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.set(40, 40, 40);
+camera.position.set(25, 25, 25);
 
 // Renderer
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -25,42 +25,60 @@ controls.enableDamping = true;
 controls.dampingFactor = 0.05;
 
 /**
- * Grid Construction
- * We use THREE.LineSegments for a clean, wireframe look.
+ * Minimalist Grid Construction
+ * Creates a base floor and a single vertical "Height" axis.
  */
-function create3DGrid(size, spacing) {
-    const material = new THREE.LineBasicMaterial({ 
-        color: 0x444444, 
+function createSimplifiedGrid(size, spacing) {
+    const group = new THREE.Group();
+    const halfSize = (size * spacing) / 2;
+
+    // High-visibility materials
+    const gridMat = new THREE.LineBasicMaterial({ 
+        color: 0x00ffff, // Cyan Neon
         transparent: true, 
-        opacity: 0.3 
+        opacity: 0.5 
     });
     
-    const points = [];
-    const offset = (size * spacing) / 2;
+    const axisMat = new THREE.LineBasicMaterial({ 
+        color: 0xff00ff, // Magenta Neon for the height edge
+        linewidth: 2 
+    });
 
+    const floorPoints = [];
+
+    // Create Floor Grid (XZ Plane)
     for (let i = 0; i <= size; i++) {
-        const pos = i * spacing - offset;
-
-        // Lines along XZ plane
-        points.push(new THREE.Vector3(-offset, pos, -offset), new THREE.Vector3(offset, pos, -offset));
-        points.push(new THREE.Vector3(-offset, pos, offset), new THREE.Vector3(offset, pos, offset));
-        points.push(new THREE.Vector3(-offset, pos, -offset), new THREE.Vector3(-offset, pos, offset));
-        points.push(new THREE.Vector3(offset, pos, -offset), new THREE.Vector3(offset, pos, offset));
-
-        // Vertical lines (Y axis)
-        points.push(new THREE.Vector3(pos, -offset, -offset), new THREE.Vector3(pos, offset, -offset));
-        points.push(new THREE.Vector3(pos, -offset, offset), new THREE.Vector3(pos, offset, offset));
-        points.push(new THREE.Vector3(-offset, -offset, pos), new THREE.Vector3(-offset, offset, pos));
-        points.push(new THREE.Vector3(offset, -offset, pos), new THREE.Vector3(offset, offset, pos));
+        const pos = i * spacing - halfSize;
+        
+        // Lines along X
+        floorPoints.push(new THREE.Vector3(-halfSize, 0, pos), new THREE.Vector3(halfSize, 0, pos));
+        // Lines along Z
+        floorPoints.push(new THREE.Vector3(pos, 0, -halfSize), new THREE.Vector3(pos, 0, halfSize));
     }
 
-    const geometry = new THREE.BufferGeometry().setFromPoints(points);
-    const grid = new THREE.LineSegments(geometry, material);
-    return grid;
+    const floorGeom = new THREE.BufferGeometry().setFromPoints(floorPoints);
+    const floorGrid = new THREE.LineSegments(floorGeom, gridMat);
+    group.add(floorGrid);
+
+    // Create Single Height Edge (Vertical Axis at the center-back)
+    const heightPoints = [
+        new THREE.Vector3(-halfSize, 0, -halfSize), 
+        new THREE.Vector3(-halfSize, size, -halfSize)
+    ];
+    
+    const heightGeom = new THREE.BufferGeometry().setFromPoints(heightPoints);
+    const heightEdge = new THREE.Line(heightGeom, axisMat);
+    group.add(heightEdge);
+
+    return group;
 }
 
-const gridSystem = create3DGrid(GRID_SIZE, GRID_SPACING);
-scene.add(gridSystem);
+const customGrid = createSimplifiedGrid(GRID_SIZE, GRID_SPACING);
+scene.add(customGrid);
+
+// Add a soft ambient light to ensure the space feels 3D
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
+scene.add(ambientLight);
 
 // Window Resize Handling
 window.addEventListener('resize', () => {

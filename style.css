@@ -1,0 +1,29 @@
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #050505;
+    font-family: 'Inter', sans-serif;
+}
+
+#ui-overlay {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    color: rgba(255, 255, 255, 0.4);
+    pointer-events: none;
+    z-index: 10;
+}
+
+h1 {
+    font-weight: 200;
+    font-size: 1.2rem;
+    letter-spacing: 2px;
+    margin: 0;
+    text-transform: uppercase;
+}
+
+p {
+    font-size: 0.7rem;
+    margin-top: 5px;
+}

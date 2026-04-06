@@ -5,86 +5,85 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>3D Minimalist Grid</title>
     <style>
-        /* General Layout */
-        body, html { 
-            margin: 0; 
+        /* Your Original Base Styles */
+        body {
+            margin: 0;
             padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden; 
-            background: #020205; 
-            font-family: 'Segoe UI', sans-serif; 
+            overflow: hidden;
+            background-color: #020205;
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s ease;
         }
 
-        canvas {
-            display: block;
-            width: 100vw;
-            height: 100vh;
-        }
-
-        /* Top Left Label */
-        #label {
-            position: absolute; 
-            top: 20px; 
+        #ui-overlay {
+            position: absolute;
+            top: 20px;
             left: 20px;
-            color: #00ffff; 
-            font-size: 11px; 
-            font-weight: bold;
+            color: rgba(255, 255, 255, 0.4);
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        h1 {
+            font-weight: 200;
+            font-size: 1.2rem;
             letter-spacing: 2px;
-            pointer-events: none; 
-            z-index: 100;
+            margin: 0;
             text-transform: uppercase;
         }
 
-        /* Right Side Toolbar */
+        p {
+            font-size: 0.7rem;
+            margin-top: 5px;
+        }
+
+        /* --- TOOLBAR STYLES (Fixed invisibility) --- */
         #toolbar {
-            position: fixed; /* Changed to fixed to stay on top */
+            position: fixed;
             top: 50%;
             right: 30px;
             transform: translateY(-50%);
             display: flex;
             flex-direction: column;
             padding: 12px;
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border-radius: 50px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            z-index: 999; /* Ensure it is above the canvas */
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 1000; /* Ensures it stays above the 3D scene */
         }
 
-        /* Theme Toggle Button */
         #theme-toggle {
-            width: 48px;
-            height: 48px;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
             border: none;
-            background: #00ffff;
+            background: #00ffff; /* Neon Cyan */
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.2s ease, background-color 0.3s ease;
         }
 
-        #theme-toggle:active {
-            transform: scale(0.9);
+        #theme-toggle:hover {
+            transform: scale(1.1);
         }
 
         #theme-icon {
-            width: 18px;
-            height: 18px;
+            width: 16px;
+            height: 16px;
             border-radius: 50%;
             background: #020205;
         }
 
-        /* Light Mode Styles */
-        body.light-mode { background: #f0f0f2; }
-        body.light-mode #label { color: #222; }
-        body.light-mode #toolbar {
-            background: rgba(0, 0, 0, 0.08);
-            border: 1px solid rgba(0, 0, 0, 0.1);
+        /* Light Mode UI Adjustments */
+        body.light-mode { background-color: #f0f0f2; }
+        body.light-mode #ui-overlay { color: rgba(0, 0, 0, 0.6); }
+        body.light-mode #toolbar { 
+            background: rgba(0, 0, 0, 0.05); 
+            border-color: rgba(0, 0, 0, 0.1); 
         }
         body.light-mode #theme-toggle { background: #222; }
         body.light-mode #theme-icon { background: #fff; }
@@ -92,10 +91,13 @@
 </head>
 <body>
 
-    <div id="label">36x36x36 SYSTEM // GRID VIEW</div>
+    <div id="ui-overlay">
+        <h1>3D Workspace</h1>
+        <p>36x36x36 Grid • Drag to Rotate</p>
+    </div>
 
     <div id="toolbar">
-        <button id="theme-toggle" title="Toggle Light/Dark Mode">
+        <button id="theme-toggle" title="Toggle Theme">
             <div id="theme-icon"></div>
         </button>
     </div>
@@ -133,36 +135,42 @@
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
 
-        // 4. Grid Reference
-        let gridHelper;
+        // 4. Grid Helper
+        let grid;
         function createGrid(dark) {
-            if (gridHelper) scene.remove(gridHelper);
-            
-            const color1 = dark ? 0x00ffff : 0x000000; // Major lines
-            const color2 = dark ? 0x222222 : 0xcccccc; // Minor lines
-            
-            gridHelper = new THREE.GridHelper(size, size, color1, color2);
-            gridHelper.material.transparent = true;
-            gridHelper.material.opacity = dark ? 0.8 : 0.4;
-            scene.add(gridHelper);
+            if (grid) scene.remove(grid);
+            const color1 = dark ? 0x00ffff : 0x0055ff;
+            const color2 = dark ? 0x222222 : 0xcccccc;
+            grid = new THREE.GridHelper(size, size, color1, color2);
+            grid.material.transparent = true;
+            grid.material.opacity = dark ? 0.8 : 0.5;
+            scene.add(grid);
         }
         createGrid(true);
 
-        // 5. Height Edge
-        const points = [new THREE.Vector3(-size/2, 0, -size/2), new THREE.Vector3(-size/2, size, -size/2)];
+        // 5. Height Edge (Reference line)
+        const points = [
+            new THREE.Vector3(-size/2, 0, -size/2), 
+            new THREE.Vector3(-size/2, size, -size/2)
+        ];
         const lineGeom = new THREE.BufferGeometry().setFromPoints(points);
         const lineMat = new THREE.LineBasicMaterial({ color: 0xff00ff });
         const heightEdge = new THREE.Line(lineGeom, lineMat);
         scene.add(heightEdge);
 
-        // 6. Theme Logic
+        // 6. Theme Toggle Functionality
         const themeBtn = document.getElementById('theme-toggle');
         themeBtn.addEventListener('click', () => {
             isDarkMode = !isDarkMode;
             document.body.classList.toggle('light-mode');
 
+            // Update Scene Background
             scene.background.set(isDarkMode ? 0x020205 : 0xf0f0f2);
+            
+            // Update Height Edge Color
             heightEdge.material.color.set(isDarkMode ? 0xff00ff : 0x000000);
+            
+            // Refresh Grid
             createGrid(isDarkMode);
         });
 

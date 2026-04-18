@@ -3,100 +3,59 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Axis Grid Generator</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-    rel="stylesheet"
-  />
+  <title>3D Grid Builder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="page-shell">
-    <div class="background-glow glow-one"></div>
-    <div class="background-glow glow-two"></div>
+  <div class="app">
+    <div class="bg-glow glow-a"></div>
+    <div class="bg-glow glow-b"></div>
 
-    <main class="app">
-      <section class="hero">
-        <span class="eyebrow">Interactive grid builder</span>
-        <h1>Build a clean, scalable grid from X, Y, and Z.</h1>
-        <p>
-          Enter your dimensions and generate a responsive grid instantly.
-          X controls columns, Y controls rows, and Z adds layered visual depth.
+    <section id="setup-screen" class="setup-screen">
+      <div class="setup-card">
+        <p class="eyebrow">3D Grid Generator</p>
+        <h1>Choose your grid size.</h1>
+        <p class="subtext">
+          Enter X, Y, and Z dimensions, then generate a draggable 3D grid.
         </p>
-      </section>
 
-      <section class="workspace">
-        <div class="panel controls-panel">
-          <div class="panel-header">
-            <h2>Grid settings</h2>
-            <p>Choose your axes, then generate the layout.</p>
+        <form id="grid-form" class="grid-form">
+          <div class="field">
+            <label for="x-input">X axis</label>
+            <input id="x-input" type="number" min="1" value="5" />
           </div>
 
-          <form id="grid-form" class="controls-form">
-            <div class="field-group">
-              <label for="x-input">X axis</label>
-              <input id="x-input" type="number" min="1" value="8" />
-              <span class="field-hint">Number of columns</span>
-            </div>
-
-            <div class="field-group">
-              <label for="y-input">Y axis</label>
-              <input id="y-input" type="number" min="1" value="6" />
-              <span class="field-hint">Number of rows</span>
-            </div>
-
-            <div class="field-group">
-              <label for="z-input">Z axis</label>
-              <input id="z-input" type="number" min="1" value="4" />
-              <span class="field-hint">Visual depth scaling</span>
-            </div>
-
-            <div class="button-row">
-              <button type="submit" class="primary-btn">Generate grid</button>
-              <button type="button" class="secondary-btn" id="reset-btn">Reset</button>
-            </div>
-          </form>
-
-          <div class="stats-grid">
-            <div class="stat-card">
-              <span class="stat-label">Columns</span>
-              <strong id="stat-x">8</strong>
-            </div>
-            <div class="stat-card">
-              <span class="stat-label">Rows</span>
-              <strong id="stat-y">6</strong>
-            </div>
-            <div class="stat-card">
-              <span class="stat-label">Depth</span>
-              <strong id="stat-z">4</strong>
-            </div>
-            <div class="stat-card">
-              <span class="stat-label">Cells</span>
-              <strong id="stat-total">48</strong>
-            </div>
+          <div class="field">
+            <label for="y-input">Y axis</label>
+            <input id="y-input" type="number" min="1" value="4" />
           </div>
+
+          <div class="field">
+            <label for="z-input">Z axis</label>
+            <input id="z-input" type="number" min="1" value="3" />
+          </div>
+
+          <button type="submit" class="generate-btn">Generate 3D Grid</button>
+        </form>
+      </div>
+    </section>
+
+    <section id="viewer-screen" class="viewer-screen hidden">
+      <div class="topbar">
+        <div class="topbar-left">
+          <div class="badge" id="grid-label">Grid: 5 × 4 × 3</div>
+          <div class="hint">Drag to rotate • Scroll to zoom • Right-drag to pan</div>
         </div>
+        <button id="back-btn" class="back-btn">Back</button>
+      </div>
 
-        <div class="panel preview-panel">
-          <div class="panel-header panel-header-row">
-            <div>
-              <h2>Live preview</h2>
-              <p>The preview updates to match your chosen grid size.</p>
-            </div>
-            <div class="preview-badge" id="grid-summary">8 × 6 × 4</div>
-          </div>
-
-          <div id="grid-preview" class="grid-preview"></div>
-          <p class="preview-note">
-            Example: if you enter <strong>6</strong> for the Y axis, the layout shows <strong>6 rows</strong>.
-          </p>
-        </div>
-      </section>
-    </main>
+      <div id="canvas-wrap" class="canvas-wrap"></div>
+    </section>
   </div>
 
-  <script src="app.js"></script>
+  <script type="module" src="app.js"></script>
 </body>
 </html>

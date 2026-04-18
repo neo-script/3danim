@@ -6,60 +6,50 @@
   <title>Spatial Grid</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-    rel="stylesheet"
-  />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #04070f;
+      --bg: #050813;
       --panel: rgba(10, 14, 24, 0.72);
-      --border: rgba(255, 255, 255, 0.08);
-      --border-soft: rgba(255, 255, 255, 0.05);
+      --border: rgba(255,255,255,0.08);
       --text: #f8fbff;
-      --muted: #8ea0bc;
-      --accent: #63e6ff;
-      --accent-2: #8b7dff;
-      --shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+      --muted: #90a0bb;
+      --cyan: #6ce7ff;
+      --violet: #9a7cff;
+      --line: rgba(125, 223, 255, 0.28);
+      --line-strong: rgba(198, 212, 255, 0.42);
+      --shadow: 0 30px 80px rgba(0,0,0,0.42);
     }
 
-    * {
-      box-sizing: border-box;
-    }
-
-    html, body {
-      margin: 0;
-      width: 100%;
-      height: 100%;
-    }
-
+    * { box-sizing: border-box; }
+    html, body { margin: 0; width: 100%; height: 100%; }
     body {
       overflow: hidden;
       font-family: "Inter", sans-serif;
       color: var(--text);
       background:
-        radial-gradient(circle at 20% 18%, rgba(99, 230, 255, 0.10), transparent 24%),
-        radial-gradient(circle at 78% 80%, rgba(139, 125, 255, 0.12), transparent 28%),
-        linear-gradient(180deg, #050915 0%, #04070f 100%);
+        radial-gradient(circle at 18% 14%, rgba(108, 231, 255, 0.12), transparent 25%),
+        radial-gradient(circle at 80% 84%, rgba(154, 124, 255, 0.12), transparent 30%),
+        linear-gradient(180deg, #07101e 0%, #04070f 100%);
     }
 
     .noise {
       position: fixed;
       inset: 0;
       pointer-events: none;
-      opacity: 0.05;
+      opacity: 0.04;
       background-image:
         linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px),
         linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px);
       background-size: 4px 4px;
-      mask-image: radial-gradient(circle at center, black 30%, transparent 100%);
+      mask-image: radial-gradient(circle at center, black 34%, transparent 100%);
     }
 
     .orb {
       position: fixed;
       border-radius: 999px;
       filter: blur(100px);
-      opacity: 0.24;
+      opacity: 0.22;
       pointer-events: none;
     }
 
@@ -68,18 +58,18 @@
       height: 24rem;
       top: -8rem;
       left: -8rem;
-      background: #3fd7ff;
+      background: #36d9ff;
     }
 
     .orb-b {
       width: 26rem;
       height: 26rem;
-      right: -10rem;
+      right: -8rem;
       bottom: -10rem;
       background: #7b61ff;
     }
 
-    .app-shell {
+    .app {
       position: relative;
       width: 100vw;
       height: 100vh;
@@ -96,32 +86,32 @@
       display: grid;
       place-items: center;
       padding: 24px;
-      transition: opacity 0.45s ease, transform 0.45s ease;
+      transition: opacity 0.4s ease, transform 0.4s ease;
     }
 
     .setup-screen.hidden {
       opacity: 0;
-      transform: scale(0.97);
+      transform: scale(0.98);
       pointer-events: none;
     }
 
     .setup-card {
-      width: min(680px, 100%);
+      width: min(700px, 100%);
       padding: 34px;
       border-radius: 32px;
-      background: linear-gradient(180deg, rgba(13,18,30,0.86), rgba(7,10,18,0.82));
+      background: linear-gradient(180deg, rgba(13, 18, 30, 0.88), rgba(8, 10, 18, 0.82));
       border: 1px solid var(--border);
       box-shadow: var(--shadow);
-      backdrop-filter: blur(22px);
+      backdrop-filter: blur(24px);
     }
 
     .eyebrow {
       display: inline-flex;
       padding: 8px 12px;
       border-radius: 999px;
-      background: rgba(99, 230, 255, 0.08);
-      border: 1px solid rgba(99, 230, 255, 0.16);
-      color: #c8f7ff;
+      background: rgba(108, 231, 255, 0.08);
+      border: 1px solid rgba(108, 231, 255, 0.18);
+      color: #cbf7ff;
       font-size: 12px;
       font-weight: 700;
       letter-spacing: 0.18em;
@@ -130,17 +120,17 @@
 
     h1 {
       margin: 18px 0 12px;
-      font-size: clamp(2.4rem, 6vw, 4.8rem);
+      font-size: clamp(2.5rem, 6vw, 4.8rem);
       line-height: 0.95;
       letter-spacing: -0.05em;
     }
 
     .lead {
       margin: 0;
-      max-width: 620px;
       color: var(--muted);
       font-size: 1.05rem;
       line-height: 1.7;
+      max-width: 620px;
     }
 
     .grid-form {
@@ -158,8 +148,8 @@
       gap: 8px;
       padding: 16px;
       border-radius: 22px;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid var(--border-soft);
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.05);
     }
 
     .field label {
@@ -176,7 +166,7 @@
       height: 56px;
       border-radius: 16px;
       border: 1px solid rgba(255,255,255,0.08);
-      background: rgba(4, 8, 16, 0.9);
+      background: rgba(5, 8, 16, 0.92);
       color: var(--text);
       padding: 0 14px;
       font-size: 1rem;
@@ -184,15 +174,15 @@
     }
 
     .field input:focus {
-      border-color: rgba(99, 230, 255, 0.65);
-      box-shadow: 0 0 0 4px rgba(99, 230, 255, 0.10);
+      border-color: rgba(108, 231, 255, 0.7);
+      box-shadow: 0 0 0 4px rgba(108, 231, 255, 0.10);
     }
 
     .generate-btn,
     .ghost-btn {
       font: inherit;
       cursor: pointer;
-      transition: transform 0.18s ease, opacity 0.18s ease, background 0.18s ease;
+      transition: transform 0.18s ease, opacity 0.18s ease;
     }
 
     .generate-btn:hover,
@@ -207,22 +197,18 @@
       border: 0;
       border-radius: 18px;
       font-weight: 800;
-      color: #07111f;
-      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
-      box-shadow: 0 18px 38px rgba(99, 230, 255, 0.16);
+      color: #08111d;
+      background: linear-gradient(135deg, var(--cyan), var(--violet));
+      box-shadow: 0 18px 38px rgba(108, 231, 255, 0.16);
     }
 
     .viewer-screen {
       z-index: 1;
+      overflow: hidden;
     }
 
     .viewer-screen.hidden {
       display: none;
-    }
-
-    .canvas-wrap {
-      position: absolute;
-      inset: 0;
     }
 
     .hud {
@@ -232,9 +218,9 @@
       right: 18px;
       z-index: 5;
       display: flex;
-      align-items: flex-start;
       justify-content: space-between;
       gap: 12px;
+      align-items: flex-start;
       pointer-events: none;
     }
 
@@ -242,6 +228,11 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
+    }
+
+    .hud-right {
+      display: flex;
+      gap: 10px;
     }
 
     .pill,
@@ -255,7 +246,7 @@
       width: fit-content;
       padding: 10px 14px;
       border-radius: 999px;
-      background: rgba(9, 13, 22, 0.78);
+      background: rgba(9, 13, 22, 0.8);
       border: 1px solid var(--border);
       backdrop-filter: blur(14px);
       font-weight: 700;
@@ -265,12 +256,6 @@
       padding-left: 4px;
       color: var(--muted);
       font-size: 0.92rem;
-    }
-
-    .hud-right {
-      display: flex;
-      gap: 10px;
-      pointer-events: auto;
     }
 
     .ghost-btn {
@@ -283,8 +268,77 @@
       backdrop-filter: blur(14px);
     }
 
-    canvas {
-      display: block;
+    .viewport {
+      position: absolute;
+      inset: 0;
+      perspective: 1400px;
+      overflow: hidden;
+      cursor: grab;
+      user-select: none;
+      touch-action: none;
+    }
+
+    .viewport.dragging {
+      cursor: grabbing;
+    }
+
+    .scene {
+      position: absolute;
+      inset: 0;
+      transform-style: preserve-3d;
+    }
+
+    .grid-root {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform-style: preserve-3d;
+      will-change: transform;
+    }
+
+    .floor-glow {
+      position: absolute;
+      width: 700px;
+      height: 700px;
+      left: 50%;
+      top: 50%;
+      transform: translate3d(-50%, -50%, 0) rotateX(90deg) translateZ(-220px);
+      border-radius: 999px;
+      background: radial-gradient(circle, rgba(82, 151, 255, 0.16) 0%, rgba(82, 151, 255, 0.07) 28%, rgba(82,151,255,0) 70%);
+      filter: blur(14px);
+      pointer-events: none;
+    }
+
+    .line {
+      position: absolute;
+      left: 0;
+      top: 0;
+      transform-origin: 0 50%;
+      height: 2px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(108,231,255,0.10), var(--line), rgba(154,124,255,0.18));
+      box-shadow:
+        0 0 12px rgba(108, 231, 255, 0.14),
+        0 0 24px rgba(154, 124, 255, 0.06);
+    }
+
+    .line.boundary {
+      background: linear-gradient(90deg, rgba(198,212,255,0.20), var(--line-strong), rgba(198,212,255,0.18));
+      box-shadow: 0 0 14px rgba(198,212,255,0.12);
+      height: 2.5px;
+    }
+
+    .node {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      margin-left: -5px;
+      margin-top: -5px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 35% 35%, #effcff 0%, var(--cyan) 35%, var(--violet) 100%);
+      box-shadow:
+        0 0 10px rgba(108,231,255,0.45),
+        0 0 18px rgba(154,124,255,0.25);
     }
 
     @media (max-width: 760px) {
@@ -304,12 +358,12 @@
         flex: 1;
       }
 
-      h1 {
-        font-size: 2.6rem;
-      }
-
       .setup-card {
         padding: 24px;
+      }
+
+      h1 {
+        font-size: 2.7rem;
       }
     }
   </style>
@@ -319,14 +373,12 @@
   <div class="orb orb-a"></div>
   <div class="orb orb-b"></div>
 
-  <main class="app-shell">
+  <main class="app">
     <section id="setupScreen" class="setup-screen">
       <div class="setup-card">
         <div class="eyebrow">Spatial Grid Builder</div>
         <h1>Build a real 3D grid.</h1>
-        <p class="lead">
-          Choose X, Y, and Z dimensions, then generate a draggable spatial lattice.
-        </p>
+        <p class="lead">Choose X, Y, and Z, then generate a draggable spatial lattice.</p>
 
         <form id="gridForm" class="grid-form">
           <div class="field-row">
@@ -349,7 +401,7 @@
             </div>
           </div>
 
-          <button type="submit" class="generate-btn">Generate Grid</button>
+          <button class="generate-btn" type="submit">Generate Grid</button>
         </form>
       </div>
     </section>
@@ -358,42 +410,43 @@
       <div class="hud">
         <div class="hud-left">
           <div class="pill" id="gridStats">6 × 5 × 4</div>
-          <div class="hint">Drag to rotate · Scroll to zoom · Right-drag to pan</div>
+          <div class="hint">Drag to rotate · Scroll to zoom</div>
         </div>
-
         <div class="hud-right">
           <button id="resetViewBtn" class="ghost-btn" type="button">Reset View</button>
           <button id="backBtn" class="ghost-btn" type="button">Back</button>
         </div>
       </div>
 
-      <div id="canvasWrap" class="canvas-wrap"></div>
+      <div id="viewport" class="viewport">
+        <div id="scene" class="scene">
+          <div class="floor-glow"></div>
+          <div id="gridRoot" class="grid-root"></div>
+        </div>
+      </div>
     </section>
   </main>
-
-  <script src="https://unpkg.com/three@0.161.0/build/three.min.js"></script>
-  <script src="https://unpkg.com/three@0.161.0/examples/js/controls/OrbitControls.js"></script>
 
   <script>
     const setupScreen = document.getElementById("setupScreen");
     const viewerScreen = document.getElementById("viewerScreen");
     const gridForm = document.getElementById("gridForm");
-    const canvasWrap = document.getElementById("canvasWrap");
-    const gridStats = document.getElementById("gridStats");
-    const backBtn = document.getElementById("backBtn");
-    const resetViewBtn = document.getElementById("resetViewBtn");
-
     const xInput = document.getElementById("xInput");
     const yInput = document.getElementById("yInput");
     const zInput = document.getElementById("zInput");
+    const gridStats = document.getElementById("gridStats");
+    const viewport = document.getElementById("viewport");
+    const gridRoot = document.getElementById("gridRoot");
+    const backBtn = document.getElementById("backBtn");
+    const resetViewBtn = document.getElementById("resetViewBtn");
 
-    let scene;
-    let camera;
-    let renderer;
-    let controls;
-    let latticeGroup = null;
+    let rotationX = -24;
+    let rotationY = 34;
+    let scale = 1;
+    let dragging = false;
+    let lastX = 0;
+    let lastY = 0;
     let currentDims = { x: 6, y: 5, z: 4 };
-    let started = false;
 
     function sanitize(value) {
       const n = Number(value);
@@ -411,236 +464,108 @@
       setupScreen.classList.remove("hidden");
     }
 
-    function initThree() {
-      scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x04070f);
-      scene.fog = new THREE.Fog(0x04070f, 18, 60);
-
-      const width = Math.max(canvasWrap.clientWidth, 1);
-      const height = Math.max(canvasWrap.clientHeight, 1);
-
-      camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 1000);
-      camera.position.set(10, 8, 12);
-
-      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      renderer.setSize(width, height);
-      canvasWrap.innerHTML = "";
-      canvasWrap.appendChild(renderer.domElement);
-
-      controls = new THREE.OrbitControls(camera, renderer.domElement);
-      controls.enableDamping = true;
-      controls.dampingFactor = 0.06;
-      controls.enablePan = true;
-      controls.minDistance = 4;
-      controls.maxDistance = 80;
-      controls.rotateSpeed = 0.85;
-      controls.zoomSpeed = 0.9;
-      controls.panSpeed = 0.8;
-
-      const ambient = new THREE.AmbientLight(0xffffff, 0.85);
-      scene.add(ambient);
-
-      const cyanLight = new THREE.PointLight(0x63e6ff, 2.8, 100);
-      cyanLight.position.set(8, 10, 8);
-      scene.add(cyanLight);
-
-      const violetLight = new THREE.PointLight(0x8b7dff, 2.4, 100);
-      violetLight.position.set(-10, -6, -8);
-      scene.add(violetLight);
-
-      const topLight = new THREE.DirectionalLight(0xffffff, 0.45);
-      topLight.position.set(0, 12, 0);
-      scene.add(topLight);
-
-      window.addEventListener("resize", onResize);
+    function projectTransform() {
+      gridRoot.style.transform =
+        `translate3d(-50%, -50%, 0) rotateX(${rotationX}deg) rotateY(${rotationY}deg) scale(${scale})`;
     }
 
-    function onResize() {
-      if (!renderer || !camera) return;
+    function makeLine(x, y, z, length, axis, boundary = false) {
+      const el = document.createElement("div");
+      el.className = boundary ? "line boundary" : "line";
 
-      const width = Math.max(canvasWrap.clientWidth, 1);
-      const height = Math.max(canvasWrap.clientHeight, 1);
-
-      camera.aspect = width / height;
-      camera.updateProjectionMatrix();
-      renderer.setSize(width, height);
-    }
-
-    function clearGrid() {
-      if (!latticeGroup) return;
-
-      while (latticeGroup.children.length > 0) {
-        const child = latticeGroup.children[0];
-        latticeGroup.remove(child);
-
-        if (child.geometry) child.geometry.dispose();
-        if (child.material) {
-          if (Array.isArray(child.material)) {
-            child.material.forEach(m => m.dispose());
-          } else {
-            child.material.dispose();
-          }
-        }
+      if (axis === "x") {
+        el.style.width = length + "px";
+        el.style.transform = `translate3d(${x}px, ${y}px, ${z}px) rotateY(0deg)`;
+      } else if (axis === "y") {
+        el.style.width = length + "px";
+        el.style.transform = `translate3d(${x}px, ${y}px, ${z}px) rotateZ(90deg)`;
+      } else if (axis === "z") {
+        el.style.width = length + "px";
+        el.style.transform = `translate3d(${x}px, ${y}px, ${z}px) rotateY(90deg)`;
       }
 
-      scene.remove(latticeGroup);
-      latticeGroup = null;
+      return el;
     }
 
-    function createLatticeLines(x, y, z, spacing) {
-      const vertices = [];
-      const maxX = (x - 1) * spacing;
-      const maxY = (y - 1) * spacing;
-      const maxZ = (z - 1) * spacing;
+    function makeNode(x, y, z, zi, zMax) {
+      const el = document.createElement("div");
+      el.className = "node";
 
-      for (let yi = 0; yi < y; yi++) {
-        for (let zi = 0; zi < z; zi++) {
-          const py = yi * spacing;
-          const pz = zi * spacing;
-          vertices.push(0, py, pz, maxX, py, pz);
-        }
-      }
-
-      for (let xi = 0; xi < x; xi++) {
-        for (let zi = 0; zi < z; zi++) {
-          const px = xi * spacing;
-          const pz = zi * spacing;
-          vertices.push(px, 0, pz, px, maxY, pz);
-        }
-      }
-
-      for (let xi = 0; xi < x; xi++) {
-        for (let yi = 0; yi < y; yi++) {
-          const px = xi * spacing;
-          const py = yi * spacing;
-          vertices.push(px, py, 0, px, py, maxZ);
-        }
-      }
-
-      const geometry = new THREE.BufferGeometry();
-      geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
-
-      const material = new THREE.LineBasicMaterial({
-        color: 0x7ddfff,
-        transparent: true,
-        opacity: 0.4
-      });
-
-      return new THREE.LineSegments(geometry, material);
-    }
-
-    function createPoints(x, y, z, spacing) {
-      const positions = [];
-      const colors = [];
-
-      for (let xi = 0; xi < x; xi++) {
-        for (let yi = 0; yi < y; yi++) {
-          for (let zi = 0; zi < z; zi++) {
-            positions.push(xi * spacing, yi * spacing, zi * spacing);
-
-            const blend = z <= 1 ? 0 : zi / (z - 1);
-            const c1 = new THREE.Color(0x6ee7ff);
-            const c2 = new THREE.Color(0xa78bfa);
-            const c = c1.clone().lerp(c2, blend);
-
-            colors.push(c.r, c.g, c.b);
-          }
-        }
-      }
-
-      const geometry = new THREE.BufferGeometry();
-      geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
-      geometry.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
-
-      const material = new THREE.PointsMaterial({
-        size: 0.12,
-        vertexColors: true,
-        transparent: true,
-        opacity: 0.95,
-        sizeAttenuation: true
-      });
-
-      return new THREE.Points(geometry, material);
-    }
-
-    function createBounds(x, y, z, spacing) {
-      const width = Math.max((x - 1) * spacing, 0.001);
-      const height = Math.max((y - 1) * spacing, 0.001);
-      const depth = Math.max((z - 1) * spacing, 0.001);
-
-      const geometry = new THREE.BoxGeometry(width, height, depth);
-      const edges = new THREE.EdgesGeometry(geometry);
-      const material = new THREE.LineBasicMaterial({
-        color: 0xc6d4ff,
-        transparent: true,
-        opacity: 0.5
-      });
-
-      const bounds = new THREE.LineSegments(edges, material);
-      bounds.position.set(width / 2, height / 2, depth / 2);
-      return bounds;
-    }
-
-    function createFloorGlow() {
-      const geometry = new THREE.PlaneGeometry(50, 50);
-      const material = new THREE.MeshBasicMaterial({
-        color: 0x08101d,
-        transparent: true,
-        opacity: 0.42
-      });
-
-      const plane = new THREE.Mesh(geometry, material);
-      plane.rotation.x = -Math.PI / 2;
-      plane.position.y = -2.4;
-      return plane;
-    }
-
-    function fitCameraToGrid(x, y, z, spacing) {
-      const width = Math.max((x - 1) * spacing, 1);
-      const height = Math.max((y - 1) * spacing, 1);
-      const depth = Math.max((z - 1) * spacing, 1);
-      const maxDim = Math.max(width, height, depth);
-
-      camera.position.set(maxDim * 1.6, maxDim * 1.3, maxDim * 1.8);
-      controls.target.set(0, 0, 0);
-      controls.update();
+      const t = zMax <= 1 ? 0 : zi / (zMax - 1);
+      const hue = 190 + t * 60;
+      el.style.background = `radial-gradient(circle at 35% 35%, #effcff 0%, hsl(${hue} 100% 72%) 35%, hsl(${hue + 25} 85% 68%) 100%)`;
+      el.style.transform = `translate3d(${x}px, ${y}px, ${z}px)`;
+      return el;
     }
 
     function buildGrid(x, y, z) {
-      clearGrid();
+      gridRoot.innerHTML = "";
 
-      const spacing = 1.3;
-      latticeGroup = new THREE.Group();
-
-      const lines = createLatticeLines(x, y, z, spacing);
-      const points = createPoints(x, y, z, spacing);
-      const bounds = createBounds(x, y, z, spacing);
-      const floor = createFloorGlow();
-
-      latticeGroup.add(floor);
-      latticeGroup.add(lines);
-      latticeGroup.add(points);
-      latticeGroup.add(bounds);
-
+      const spacing = 44;
       const width = (x - 1) * spacing;
       const height = (y - 1) * spacing;
       const depth = (z - 1) * spacing;
 
-      latticeGroup.position.set(-width / 2, -height / 2, -depth / 2);
+      const offsetX = -width / 2;
+      const offsetY = -height / 2;
+      const offsetZ = -depth / 2;
 
-      scene.add(latticeGroup);
-      fitCameraToGrid(x, y, z, spacing);
-      gridStats.textContent = x + " × " + y + " × " + z;
+      const frag = document.createDocumentFragment();
+
+      for (let yi = 0; yi < y; yi++) {
+        for (let zi = 0; zi < z; zi++) {
+          const boundary = (yi === 0 || yi === y - 1) && (zi === 0 || zi === z - 1);
+          frag.appendChild(
+            makeLine(offsetX, offsetY + yi * spacing, offsetZ + zi * spacing, width, "x", boundary)
+          );
+        }
+      }
+
+      for (let xi = 0; xi < x; xi++) {
+        for (let zi = 0; zi < z; zi++) {
+          const boundary = (xi === 0 || xi === x - 1) && (zi === 0 || zi === z - 1);
+          frag.appendChild(
+            makeLine(offsetX + xi * spacing, offsetY, offsetZ + zi * spacing, height, "y", boundary)
+          );
+        }
+      }
+
+      for (let xi = 0; xi < x; xi++) {
+        for (let yi = 0; yi < y; yi++) {
+          const boundary = (xi === 0 || xi === x - 1) && (yi === 0 || yi === y - 1);
+          frag.appendChild(
+            makeLine(offsetX + xi * spacing, offsetY + yi * spacing, offsetZ, depth, "z", boundary)
+          );
+        }
+      }
+
+      for (let xi = 0; xi < x; xi++) {
+        for (let yi = 0; yi < y; yi++) {
+          for (let zi = 0; zi < z; zi++) {
+            frag.appendChild(
+              makeNode(
+                offsetX + xi * spacing,
+                offsetY + yi * spacing,
+                offsetZ + zi * spacing,
+                zi,
+                z
+              )
+            );
+          }
+        }
+      }
+
+      gridRoot.appendChild(frag);
+      gridStats.textContent = `${x} × ${y} × ${z}`;
+
+      const maxDim = Math.max(x, y, z);
+      scale = Math.max(0.42, Math.min(1.35, 8 / maxDim));
+      rotationX = -24;
+      rotationY = 34;
+      projectTransform();
     }
 
-    function animate() {
-      requestAnimationFrame(animate);
-      if (controls) controls.update();
-      if (renderer && scene && camera) renderer.render(scene, camera);
-    }
-
-    gridForm.addEventListener("submit", function (e) {
+    gridForm.addEventListener("submit", (e) => {
       e.preventDefault();
 
       const x = sanitize(xInput.value);
@@ -648,34 +573,60 @@
       const z = sanitize(zInput.value);
 
       currentDims = { x, y, z };
-
       xInput.value = x;
       yInput.value = y;
       zInput.value = z;
 
-      showViewer();
-
-      if (!started) {
-        initThree();
-        animate();
-        started = true;
-      } else {
-        onResize();
-      }
-
       buildGrid(x, y, z);
+      showViewer();
     });
 
-    backBtn.addEventListener("click", function () {
+    backBtn.addEventListener("click", () => {
       showSetup();
     });
 
-    resetViewBtn.addEventListener("click", function () {
-      if (!camera) return;
-      fitCameraToGrid(currentDims.x, currentDims.y, currentDims.z, 1.3);
+    resetViewBtn.addEventListener("click", () => {
+      buildGrid(currentDims.x, currentDims.y, currentDims.z);
     });
 
+    viewport.addEventListener("pointerdown", (e) => {
+      dragging = true;
+      lastX = e.clientX;
+      lastY = e.clientY;
+      viewport.classList.add("dragging");
+      viewport.setPointerCapture(e.pointerId);
+    });
+
+    viewport.addEventListener("pointermove", (e) => {
+      if (!dragging) return;
+      const dx = e.clientX - lastX;
+      const dy = e.clientY - lastY;
+      lastX = e.clientX;
+      lastY = e.clientY;
+
+      rotationY += dx * 0.45;
+      rotationX -= dy * 0.35;
+      rotationX = Math.max(-89, Math.min(89, rotationX));
+      projectTransform();
+    });
+
+    function stopDragging(e) {
+      dragging = false;
+      viewport.classList.remove("dragging");
+      try { viewport.releasePointerCapture(e.pointerId); } catch {}
+    }
+
+    viewport.addEventListener("pointerup", stopDragging);
+    viewport.addEventListener("pointercancel", stopDragging);
+    viewport.addEventListener("wheel", (e) => {
+      e.preventDefault();
+      const next = scale - e.deltaY * 0.001;
+      scale = Math.max(0.2, Math.min(2.4, next));
+      projectTransform();
+    }, { passive: false });
+
     viewerScreen.classList.add("hidden");
+    projectTransform();
   </script>
 </body>
 </html>

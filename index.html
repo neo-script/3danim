@@ -3,58 +3,68 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>3D Grid Builder</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <title>Spatial Grid</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="app">
-    <div class="bg-glow glow-a"></div>
-    <div class="bg-glow glow-b"></div>
+  <div class="noise"></div>
+  <div class="orb orb-a"></div>
+  <div class="orb orb-b"></div>
 
-    <section id="setup-screen" class="setup-screen">
+  <main class="app-shell">
+    <section id="setupScreen" class="setup-screen">
       <div class="setup-card">
-        <p class="eyebrow">3D Grid Generator</p>
-        <h1>Choose your grid size.</h1>
-        <p class="subtext">
-          Enter X, Y, and Z dimensions, then generate a draggable 3D grid.
+        <div class="eyebrow">Spatial Grid Builder</div>
+        <h1>Build a real 3D grid.</h1>
+        <p class="lead">
+          Choose X, Y, and Z dimensions, then step into a draggable spatial lattice.
         </p>
 
-        <form id="grid-form" class="grid-form">
-          <div class="field">
-            <label for="x-input">X axis</label>
-            <input id="x-input" type="number" min="1" value="5" />
+        <form id="gridForm" class="grid-form">
+          <div class="field-row">
+            <div class="field">
+              <label for="xInput">X</label>
+              <input id="xInput" type="number" min="1" value="6" />
+              <span>Width</span>
+            </div>
+
+            <div class="field">
+              <label for="yInput">Y</label>
+              <input id="yInput" type="number" min="1" value="5" />
+              <span>Height</span>
+            </div>
+
+            <div class="field">
+              <label for="zInput">Z</label>
+              <input id="zInput" type="number" min="1" value="4" />
+              <span>Depth</span>
+            </div>
           </div>
 
-          <div class="field">
-            <label for="y-input">Y axis</label>
-            <input id="y-input" type="number" min="1" value="4" />
-          </div>
-
-          <div class="field">
-            <label for="z-input">Z axis</label>
-            <input id="z-input" type="number" min="1" value="3" />
-          </div>
-
-          <button type="submit" class="generate-btn">Generate 3D Grid</button>
+          <button type="submit" class="generate-btn">Generate Grid</button>
         </form>
       </div>
     </section>
 
-    <section id="viewer-screen" class="viewer-screen hidden">
-      <div class="topbar">
-        <div class="topbar-left">
-          <div class="badge" id="grid-label">Grid: 5 × 4 × 3</div>
-          <div class="hint">Drag to rotate • Scroll to zoom • Right-drag to pan</div>
+    <section id="viewerScreen" class="viewer-screen hidden">
+      <div class="hud">
+        <div class="hud-left">
+          <div class="pill" id="gridStats">6 × 5 × 4</div>
+          <div class="hint">Drag to rotate · Scroll to zoom · Right-drag to pan</div>
         </div>
-        <button id="back-btn" class="back-btn">Back</button>
+        <button id="resetViewBtn" class="ghost-btn">Reset View</button>
+        <button id="backBtn" class="ghost-btn">Back</button>
       </div>
 
-      <div id="canvas-wrap" class="canvas-wrap"></div>
+      <div id="canvasWrap" class="canvas-wrap"></div>
     </section>
-  </div>
+  </main>
 
   <script type="module" src="app.js"></script>
 </body>

@@ -1,5 +1,5 @@
-import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js";
-import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/controls/OrbitControls.js";
+import * as THREE from "https://esm.sh/three@0.161.0";
+import { OrbitControls } from "https://esm.sh/three@0.161.0/examples/jsm/controls/OrbitControls.js";
 
 const setupScreen = document.getElementById("setupScreen");
 const viewerScreen = document.getElementById("viewerScreen");
@@ -17,13 +17,9 @@ let scene;
 let camera;
 let renderer;
 let controls;
-let animationId;
-
 let latticeGroup = null;
-let pointsMesh = null;
-let outlineMesh = null;
-
 let currentDims = { x: 6, y: 5, z: 4 };
+let isThreeReady = false;
 
 function sanitize(value) {
   const n = Number(value);
@@ -31,26 +27,33 @@ function sanitize(value) {
   return Math.floor(n);
 }
 
+function showViewer() {
+  setupScreen.classList.add("hidden");
+  viewerScreen.classList.remove("hidden");
+}
+
+function showSetup() {
+  viewerScreen.classList.add("hidden");
+  setupScreen.classList.remove("hidden");
+}
+
 function initThree() {
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x04070f);
-  scene.fog = new THREE.Fog(0x04070f, 22, 55);
+  scene.fog = new THREE.Fog(0x04070f, 18, 60);
 
-  camera = new THREE.PerspectiveCamera(
-    48,
-    canvasWrap.clientWidth / canvasWrap.clientHeight,
-    0.1,
-    1000
-  );
-  camera.position.set(10, 9, 12);
+  const width = Math.max(canvasWrap.clientWidth, 1);
+  const height = Math.max(canvasWrap.clientHeight, 1);
 
-  renderer = new THREE.WebGLRenderer({
-    antialias: true,
-    alpha: false
-  });
-  renderer.setSize(canvasWrap.clientWidth, canvasWrap.clientHeight);
+  camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 1000);
+  camera.position.set(10, 8, 12);
+
+  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(width, height);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+  canvasWrap.innerHTML = "";
   canvasWrap.appendChild(renderer.domElement);
 
   controls = new OrbitControls(camera, renderer.domElement);
@@ -59,49 +62,59 @@ function initThree() {
   controls.enablePan = true;
   controls.minDistance = 4;
   controls.maxDistance = 80;
-  controls.rotateSpeed = 0.8;
+  controls.rotateSpeed = 0.85;
   controls.zoomSpeed = 0.9;
   controls.panSpeed = 0.8;
 
-  const ambient = new THREE.AmbientLight(0xffffff, 0.75);
+  const ambient = new THREE.AmbientLight(0xffffff, 0.8);
   scene.add(ambient);
 
-  const cyanLight = new THREE.PointLight(0x63e6ff, 15, 70, 2);
+  const cyanLight = new THREE.PointLight(0x63e6ff, 18, 100, 2);
   cyanLight.position.set(8, 10, 8);
   scene.add(cyanLight);
 
-  const violetLight = new THREE.PointLight(0x8b7dff, 10, 80, 2);
-  violetLight.position.set(-10, -4, -8);
+  const violetLight = new THREE.PointLight(0x8b7dff, 15, 100, 2);
+  violetLight.position.set(-10, -6, -8);
   scene.add(violetLight);
 
-  const topLight = new THREE.DirectionalLight(0xffffff, 0.55);
+  const topLight = new THREE.DirectionalLight(0xffffff, 0.35);
   topLight.position.set(0, 12, 0);
   scene.add(topLight);
 
   window.addEventListener("resize", onResize);
+  isThreeReady = true;
 }
 
-function clearCurrentGrid() {
-  if (latticeGroup) {
-    latticeGroup.traverse((obj) => {
-      if (obj.geometry) obj.geometry.dispose();
-      if (obj.material) {
-        if (Array.isArray(obj.material)) {
-          obj.material.forEach((m) => m.dispose());
-        } else {
-          obj.material.dispose();
-        }
+function onResize() {
+  if (!renderer || !camera) return;
+
+  const width = Math.max(canvasWrap.clientWidth, 1);
+  const height = Math.max(canvasWrap.clientHeight, 1);
+
+  camera.aspect = width / height;
+  camera.updateProjectionMatrix();
+  renderer.setSize(width, height);
+}
+
+function clearGrid() {
+  if (!latticeGroup) return;
+
+  latticeGroup.traverse((obj) => {
+    if (obj.geometry) obj.geometry.dispose();
+    if (obj.material) {
+      if (Array.isArray(obj.material)) {
+        obj.material.forEach((m) => m.dispose());
+      } else {
+        obj.material.dispose();
       }
-    });
-    scene.remove(latticeGroup);
-    latticeGroup = null;
-  }
+    }
+  });
 
-  pointsMesh = null;
-  outlineMesh = null;
+  scene.remove(latticeGroup);
+  latticeGroup = null;
 }
 
-function createLatticeLines(x, y, z, spacing = 1.25) {
+function createLatticeLines(x, y, z, spacing = 1.3) {
   const vertices = [];
 
   const maxX = (x - 1) * spacing;
@@ -133,41 +146,34 @@ function createLatticeLines(x, y, z, spacing = 1.25) {
   }
 
   const geometry = new THREE.BufferGeometry();
-  geometry.setAttribute(
-    "position",
-    new THREE.Float32BufferAttribute(vertices, 3)
-  );
+  geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
 
   const material = new THREE.LineBasicMaterial({
-    color: 0x7ddfff,
+    color: 0x74ddff,
     transparent: true,
-    opacity: 0.34
+    opacity: 0.42
   });
 
   return new THREE.LineSegments(geometry, material);
 }
 
-function createIntersectionPoints(x, y, z, spacing = 1.25) {
+function createPoints(x, y, z, spacing = 1.3) {
   const positions = [];
   const colors = [];
 
   for (let xi = 0; xi < x; xi++) {
     for (let yi = 0; yi < y; yi++) {
       for (let zi = 0; zi < z; zi++) {
-        const px = xi * spacing;
-        const py = yi * spacing;
-        const pz = zi * spacing;
-
-        positions.push(px, py, pz);
+        positions.push(xi * spacing, yi * spacing, zi * spacing);
 
         const blend = z <= 1 ? 0 : zi / (z - 1);
-        const c = new THREE.Color().lerpColors(
+        const color = new THREE.Color().lerpColors(
           new THREE.Color(0x6ee7ff),
-          new THREE.Color(0x9a7cff),
+          new THREE.Color(0xa78bfa),
           blend
         );
 
-        colors.push(c.r, c.g, c.b);
+        colors.push(color.r, color.g, color.b);
       }
     }
   }
@@ -187,52 +193,63 @@ function createIntersectionPoints(x, y, z, spacing = 1.25) {
   return new THREE.Points(geometry, material);
 }
 
-function createBoundingBox(x, y, z, spacing = 1.25) {
-  const width = Math.max((x - 1) * spacing, 0.01);
-  const height = Math.max((y - 1) * spacing, 0.01);
-  const depth = Math.max((z - 1) * spacing, 0.01);
+function createBounds(x, y, z, spacing = 1.3) {
+  const width = Math.max((x - 1) * spacing, 0.001);
+  const height = Math.max((y - 1) * spacing, 0.001);
+  const depth = Math.max((z - 1) * spacing, 0.001);
 
   const boxGeometry = new THREE.BoxGeometry(width, height, depth);
   const edges = new THREE.EdgesGeometry(boxGeometry);
   const material = new THREE.LineBasicMaterial({
-    color: 0xb4c7ff,
+    color: 0xc6d4ff,
+    transparent: true,
+    opacity: 0.5
+  });
+
+  const mesh = new THREE.LineSegments(edges, material);
+  mesh.position.set(width / 2, height / 2, depth / 2);
+  return mesh;
+}
+
+function createFloorGlow() {
+  const geometry = new THREE.PlaneGeometry(40, 40);
+  const material = new THREE.MeshBasicMaterial({
+    color: 0x08101d,
     transparent: true,
     opacity: 0.45
   });
 
-  const box = new THREE.LineSegments(edges, material);
-  box.position.set(width / 2, height / 2, depth / 2);
-  return box;
-}
-
-function createBaseGlowPlane(size = 40) {
-  const geometry = new THREE.PlaneGeometry(size, size);
-  const material = new THREE.MeshBasicMaterial({
-    color: 0x0a1222,
-    transparent: true,
-    opacity: 0.35
-  });
-
   const plane = new THREE.Mesh(geometry, material);
   plane.rotation.x = -Math.PI / 2;
-  plane.position.y = -2.2;
+  plane.position.y = -2.4;
   return plane;
 }
 
-function buildGrid(x, y, z) {
-  clearCurrentGrid();
+function fitCameraToGrid(x, y, z, spacing = 1.3) {
+  const width = Math.max((x - 1) * spacing, 1);
+  const height = Math.max((y - 1) * spacing, 1);
+  const depth = Math.max((z - 1) * spacing, 1);
+  const maxDim = Math.max(width, height, depth);
 
-  const spacing = 1.25;
+  camera.position.set(maxDim * 1.6, maxDim * 1.3, maxDim * 1.8);
+  controls.target.set(0, 0, 0);
+  controls.update();
+}
+
+function buildGrid(x, y, z) {
+  clearGrid();
+
+  const spacing = 1.3;
   latticeGroup = new THREE.Group();
 
-  const latticeLines = createLatticeLines(x, y, z, spacing);
-  const intersections = createIntersectionPoints(x, y, z, spacing);
-  const bounds = createBoundingBox(x, y, z, spacing);
-  const floor = createBaseGlowPlane();
+  const lines = createLatticeLines(x, y, z, spacing);
+  const points = createPoints(x, y, z, spacing);
+  const bounds = createBounds(x, y, z, spacing);
+  const floor = createFloorGlow();
 
   latticeGroup.add(floor);
-  latticeGroup.add(latticeLines);
-  latticeGroup.add(intersections);
+  latticeGroup.add(lines);
+  latticeGroup.add(points);
   latticeGroup.add(bounds);
 
   const width = (x - 1) * spacing;
@@ -240,58 +257,23 @@ function buildGrid(x, y, z) {
   const depth = (z - 1) * spacing;
 
   latticeGroup.position.set(-width / 2, -height / 2, -depth / 2);
-
   scene.add(latticeGroup);
-  pointsMesh = intersections;
-  outlineMesh = bounds;
 
   fitCameraToGrid(x, y, z, spacing);
   gridStats.textContent = `${x} × ${y} × ${z}`;
 }
 
-function fitCameraToGrid(x, y, z, spacing = 1.25) {
-  const width = Math.max((x - 1) * spacing, 1);
-  const height = Math.max((y - 1) * spacing, 1);
-  const depth = Math.max((z - 1) * spacing, 1);
-  const maxDim = Math.max(width, height, depth);
-
-  camera.position.set(maxDim * 1.55, maxDim * 1.25, maxDim * 1.7);
-  controls.target.set(0, 0, 0);
-  controls.update();
-}
-
-function showViewer() {
-  setupScreen.classList.add("hidden");
-  viewerScreen.classList.remove("hidden");
-}
-
-function showSetup() {
-  viewerScreen.classList.add("hidden");
-  setupScreen.classList.remove("hidden");
-}
-
-function onResize() {
-  if (!renderer || !camera) return;
-  const w = canvasWrap.clientWidth;
-  const h = canvasWrap.clientHeight;
-  camera.aspect = w / h;
-  camera.updateProjectionMatrix();
-  renderer.setSize(w, h);
-}
-
 function animate() {
-  animationId = requestAnimationFrame(animate);
+  requestAnimationFrame(animate);
 
-  if (latticeGroup) {
-    latticeGroup.rotation.y += 0.0015;
+  if (controls) controls.update();
+  if (renderer && scene && camera) {
+    renderer.render(scene, camera);
   }
-
-  controls.update();
-  renderer.render(scene, camera);
 }
 
-gridForm.addEventListener("submit", (e) => {
-  e.preventDefault();
+gridForm.addEventListener("submit", (event) => {
+  event.preventDefault();
 
   const x = sanitize(xInput.value);
   const y = sanitize(yInput.value);
@@ -303,13 +285,16 @@ gridForm.addEventListener("submit", (e) => {
   yInput.value = y;
   zInput.value = z;
 
-  if (!renderer) {
+  showViewer();
+
+  if (!isThreeReady) {
     initThree();
     animate();
+  } else {
+    onResize();
   }
 
   buildGrid(x, y, z);
-  showViewer();
 });
 
 backBtn.addEventListener("click", () => {
@@ -317,7 +302,9 @@ backBtn.addEventListener("click", () => {
 });
 
 resetViewBtn.addEventListener("click", () => {
-  fitCameraToGrid(currentDims.x, currentDims.y, currentDims.z);
+  if (isThreeReady) {
+    fitCameraToGrid(currentDims.x, currentDims.y, currentDims.z);
+  }
 });
 
 viewerScreen.classList.add("hidden");

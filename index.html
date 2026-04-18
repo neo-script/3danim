@@ -1,193 +1,102 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Minimalist Grid</title>
-    <style>
-        /* Your Original Base Styles */
-        body {
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            background-color: #020205;
-            font-family: 'Inter', sans-serif;
-            transition: background-color 0.3s ease;
-        }
-
-        #ui-overlay {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            color: rgba(255, 255, 255, 0.4);
-            pointer-events: none;
-            z-index: 10;
-        }
-
-        h1 {
-            font-weight: 200;
-            font-size: 1.2rem;
-            letter-spacing: 2px;
-            margin: 0;
-            text-transform: uppercase;
-        }
-
-        p {
-            font-size: 0.7rem;
-            margin-top: 5px;
-        }
-
-        /* --- TOOLBAR STYLES (Fixed invisibility) --- */
-        #toolbar {
-            position: fixed;
-            top: 50%;
-            right: 30px;
-            transform: translateY(-50%);
-            display: flex;
-            flex-direction: column;
-            padding: 12px;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-radius: 40px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            z-index: 1000; /* Ensures it stays above the 3D scene */
-        }
-
-        #theme-toggle {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            border: none;
-            background: #00ffff; /* Neon Cyan */
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.2s ease, background-color 0.3s ease;
-        }
-
-        #theme-toggle:hover {
-            transform: scale(1.1);
-        }
-
-        #theme-icon {
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background: #020205;
-        }
-
-        /* Light Mode UI Adjustments */
-        body.light-mode { background-color: #f0f0f2; }
-        body.light-mode #ui-overlay { color: rgba(0, 0, 0, 0.6); }
-        body.light-mode #toolbar { 
-            background: rgba(0, 0, 0, 0.05); 
-            border-color: rgba(0, 0, 0, 0.1); 
-        }
-        body.light-mode #theme-toggle { background: #222; }
-        body.light-mode #theme-icon { background: #fff; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Axis Grid Generator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <div class="page-shell">
+    <div class="background-glow glow-one"></div>
+    <div class="background-glow glow-two"></div>
 
-    <div id="ui-overlay">
-        <h1>3D Workspace</h1>
-        <p>36x36x36 Grid • Drag to Rotate</p>
-    </div>
+    <main class="app">
+      <section class="hero">
+        <span class="eyebrow">Interactive grid builder</span>
+        <h1>Build a clean, scalable grid from X, Y, and Z.</h1>
+        <p>
+          Enter your dimensions and generate a responsive grid instantly.
+          X controls columns, Y controls rows, and Z adds layered visual depth.
+        </p>
+      </section>
 
-    <div id="toolbar">
-        <button id="theme-toggle" title="Toggle Theme">
-            <div id="theme-icon"></div>
-        </button>
-    </div>
+      <section class="workspace">
+        <div class="panel controls-panel">
+          <div class="panel-header">
+            <h2>Grid settings</h2>
+            <p>Choose your axes, then generate the layout.</p>
+          </div>
 
-    <script type="importmap">
-        {
-            "imports": {
-                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-            }
-        }
-    </script>
+          <form id="grid-form" class="controls-form">
+            <div class="field-group">
+              <label for="x-input">X axis</label>
+              <input id="x-input" type="number" min="1" value="8" />
+              <span class="field-hint">Number of columns</span>
+            </div>
 
-    <script type="module">
-        import * as THREE from 'three';
-        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+            <div class="field-group">
+              <label for="y-input">Y axis</label>
+              <input id="y-input" type="number" min="1" value="6" />
+              <span class="field-hint">Number of rows</span>
+            </div>
 
-        const size = 36;
-        let isDarkMode = true;
+            <div class="field-group">
+              <label for="z-input">Z axis</label>
+              <input id="z-input" type="number" min="1" value="4" />
+              <span class="field-hint">Visual depth scaling</span>
+            </div>
 
-        // 1. Scene & Camera
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x020205);
+            <div class="button-row">
+              <button type="submit" class="primary-btn">Generate grid</button>
+              <button type="button" class="secondary-btn" id="reset-btn">Reset</button>
+            </div>
+          </form>
 
-        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(45, 35, 45);
+          <div class="stats-grid">
+            <div class="stat-card">
+              <span class="stat-label">Columns</span>
+              <strong id="stat-x">8</strong>
+            </div>
+            <div class="stat-card">
+              <span class="stat-label">Rows</span>
+              <strong id="stat-y">6</strong>
+            </div>
+            <div class="stat-card">
+              <span class="stat-label">Depth</span>
+              <strong id="stat-z">4</strong>
+            </div>
+            <div class="stat-card">
+              <span class="stat-label">Cells</span>
+              <strong id="stat-total">48</strong>
+            </div>
+          </div>
+        </div>
 
-        // 2. Renderer
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(window.devicePixelRatio);
-        document.body.appendChild(renderer.domElement);
+        <div class="panel preview-panel">
+          <div class="panel-header panel-header-row">
+            <div>
+              <h2>Live preview</h2>
+              <p>The preview updates to match your chosen grid size.</p>
+            </div>
+            <div class="preview-badge" id="grid-summary">8 × 6 × 4</div>
+          </div>
 
-        // 3. Controls
-        const controls = new OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
+          <div id="grid-preview" class="grid-preview"></div>
+          <p class="preview-note">
+            Example: if you enter <strong>6</strong> for the Y axis, the layout shows <strong>6 rows</strong>.
+          </p>
+        </div>
+      </section>
+    </main>
+  </div>
 
-        // 4. Grid Helper
-        let grid;
-        function createGrid(dark) {
-            if (grid) scene.remove(grid);
-            const color1 = dark ? 0x00ffff : 0x0055ff;
-            const color2 = dark ? 0x222222 : 0xcccccc;
-            grid = new THREE.GridHelper(size, size, color1, color2);
-            grid.material.transparent = true;
-            grid.material.opacity = dark ? 0.8 : 0.5;
-            scene.add(grid);
-        }
-        createGrid(true);
-
-        // 5. Height Edge (Reference line)
-        const points = [
-            new THREE.Vector3(-size/2, 0, -size/2), 
-            new THREE.Vector3(-size/2, size, -size/2)
-        ];
-        const lineGeom = new THREE.BufferGeometry().setFromPoints(points);
-        const lineMat = new THREE.LineBasicMaterial({ color: 0xff00ff });
-        const heightEdge = new THREE.Line(lineGeom, lineMat);
-        scene.add(heightEdge);
-
-        // 6. Theme Toggle Functionality
-        const themeBtn = document.getElementById('theme-toggle');
-        themeBtn.addEventListener('click', () => {
-            isDarkMode = !isDarkMode;
-            document.body.classList.toggle('light-mode');
-
-            // Update Scene Background
-            scene.background.set(isDarkMode ? 0x020205 : 0xf0f0f2);
-            
-            // Update Height Edge Color
-            heightEdge.material.color.set(isDarkMode ? 0xff00ff : 0x000000);
-            
-            // Refresh Grid
-            createGrid(isDarkMode);
-        });
-
-        // 7. Animation Loop
-        function animate() {
-            requestAnimationFrame(animate);
-            controls.update();
-            renderer.render(scene, camera);
-        }
-
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-
-        animate();
-    </script>
+  <script src="app.js"></script>
 </body>
 </html>

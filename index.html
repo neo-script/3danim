@@ -348,7 +348,8 @@
 
     .generate-btn,
     .ghost-btn,
-    .tool-btn {
+    .tool-btn,
+    .options-toggle {
       font: inherit;
       cursor: pointer;
       transition: transform 0.18s ease, opacity 0.18s ease, background 0.18s ease, border-color 0.18s ease;
@@ -356,7 +357,8 @@
 
     .generate-btn:hover,
     .ghost-btn:hover,
-    .tool-btn:hover {
+    .tool-btn:hover,
+    .options-toggle:hover {
       transform: translateY(-1px);
     }
 
@@ -408,11 +410,11 @@
       gap: 10px;
       align-items: flex-start;
       pointer-events: auto;
+      margin-left: auto;
     }
 
     .pill,
-    .hint,
-    .ghost-btn {
+    .hint {
       pointer-events: auto;
     }
 
@@ -433,14 +435,41 @@
       font-size: 0.92rem;
     }
 
-    .ghost-btn {
+    .options-toggle {
+      width: 44px;
       height: 44px;
-      padding: 0 16px;
+      display: grid;
+      place-items: center;
       border-radius: 14px;
       border: 1px solid var(--border);
       background: rgba(10, 14, 24, 0.78);
       color: var(--text);
       backdrop-filter: blur(14px);
+      padding: 0;
+    }
+
+    .options-toggle svg,
+    .tool-btn svg {
+      width: 18px;
+      height: 18px;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .tool-panel {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    .tool-panel.collapsed {
+      opacity: 0;
+      transform: translateY(-4px);
+      pointer-events: none;
     }
 
     .tool-menu {
@@ -467,16 +496,6 @@
       padding: 0;
     }
 
-    .tool-btn svg {
-      width: 18px;
-      height: 18px;
-      stroke: currentColor;
-      stroke-width: 1.8;
-      fill: none;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-
     .tool-btn.active {
       background: linear-gradient(135deg, rgba(115, 232, 255, 0.20), rgba(155, 132, 255, 0.20));
       border-color: rgba(115, 232, 255, 0.28);
@@ -499,6 +518,10 @@
 
     #canvasWrap.pan-mode {
       cursor: move;
+    }
+
+    #canvasWrap.add-mode {
+      cursor: crosshair;
     }
 
     #canvasWrap:active {
@@ -540,6 +563,11 @@
         flex-wrap: wrap;
       }
 
+      .tool-panel {
+        width: 100%;
+        justify-content: flex-end;
+      }
+
       .tool-menu {
         flex-direction: row;
         align-items: center;
@@ -549,10 +577,6 @@
         width: 1px;
         height: 28px;
         margin: 0 2px;
-      }
-
-      .ghost-btn {
-        flex: 1;
       }
 
       .setup-card {
@@ -665,34 +689,47 @@
         </div>
 
         <div class="hud-right">
-          <div class="tool-menu">
-            <button id="handToolBtn" class="tool-btn" type="button" aria-label="Pan mode" title="Pan mode">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M8 11V5.5a1.5 1.5 0 0 1 3 0V9"></path>
-                <path d="M11 9V4.5a1.5 1.5 0 0 1 3 0V9"></path>
-                <path d="M14 9V5.5a1.5 1.5 0 0 1 3 0V11"></path>
-                <path d="M8 12V8.5a1.5 1.5 0 0 0-3 0V14a7 7 0 0 0 7 7h1a7 7 0 0 0 7-7v-1.5a1.5 1.5 0 0 0-3 0V14"></path>
-              </svg>
-            </button>
+          <button id="optionsToggleBtn" class="options-toggle" type="button" aria-label="Minimize options" title="Minimize options">
+            <svg id="optionsToggleIcon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M6 9l6 6 6-6"></path>
+            </svg>
+          </button>
 
-            <div class="tool-divider"></div>
+          <div id="toolPanel" class="tool-panel">
+            <div class="tool-menu">
+              <button id="addCubeBtn" class="tool-btn" type="button" aria-label="Add cubes mode" title="Add cubes mode">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 2l8 4.5-8 4.5-8-4.5 8-4.5z"></path>
+                  <path d="M4 6.5V15.5L12 20l8-4.5V6.5"></path>
+                  <path d="M12 11v9"></path>
+                </svg>
+              </button>
 
-            <button id="zoomInBtn" class="tool-btn" type="button" aria-label="Zoom in" title="Zoom in">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M12 5v14"></path>
-                <path d="M5 12h14"></path>
-              </svg>
-            </button>
+              <button id="handToolBtn" class="tool-btn" type="button" aria-label="Pan mode" title="Pan mode">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M8 11V5.5a1.5 1.5 0 0 1 3 0V9"></path>
+                  <path d="M11 9V4.5a1.5 1.5 0 0 1 3 0V9"></path>
+                  <path d="M14 9V5.5a1.5 1.5 0 0 1 3 0V11"></path>
+                  <path d="M8 12V8.5a1.5 1.5 0 0 0-3 0V14a7 7 0 0 0 7 7h1a7 7 0 0 0 7-7v-1.5a1.5 1.5 0 0 0-3 0V14"></path>
+                </svg>
+              </button>
 
-            <button id="zoomOutBtn" class="tool-btn" type="button" aria-label="Zoom out" title="Zoom out">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M5 12h14"></path>
-              </svg>
-            </button>
+              <div class="tool-divider"></div>
+
+              <button id="zoomInBtn" class="tool-btn" type="button" aria-label="Zoom in" title="Zoom in">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 5v14"></path>
+                  <path d="M5 12h14"></path>
+                </svg>
+              </button>
+
+              <button id="zoomOutBtn" class="tool-btn" type="button" aria-label="Zoom out" title="Zoom out">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M5 12h14"></path>
+                </svg>
+              </button>
+            </div>
           </div>
-
-          <button id="resetViewBtn" class="ghost-btn" type="button">Reset View</button>
-          <button id="backBtn" class="ghost-btn" type="button">Back</button>
         </div>
       </div>
 
@@ -712,11 +749,13 @@
     const zInput = document.getElementById("zInput");
     const gridStats = document.getElementById("gridStats");
     const canvasWrap = document.getElementById("canvasWrap");
-    const backBtn = document.getElementById("backBtn");
-    const resetViewBtn = document.getElementById("resetViewBtn");
     const handToolBtn = document.getElementById("handToolBtn");
+    const addCubeBtn = document.getElementById("addCubeBtn");
     const zoomInBtn = document.getElementById("zoomInBtn");
     const zoomOutBtn = document.getElementById("zoomOutBtn");
+    const optionsToggleBtn = document.getElementById("optionsToggleBtn");
+    const optionsToggleIcon = document.getElementById("optionsToggleIcon");
+    const toolPanel = document.getElementById("toolPanel");
 
     let renderer;
     let scene;
@@ -724,9 +763,19 @@
     let controls;
     let gridGroup = null;
     let floorGroup = null;
+    let cubesGroup = null;
+    let pickGroup = null;
     let animationStarted = false;
     let currentDims = { x: 6, y: 5, z: 4 };
     let panMode = false;
+    let addMode = false;
+    let optionsCollapsed = false;
+
+    let raycaster;
+    let pointer;
+    let hoverCell = null;
+    let hoverMesh = null;
+    const fillMeshes = new Map();
 
     function sanitize(value) {
       const n = Number(value);
@@ -744,14 +793,30 @@
       setupScreen.classList.remove("hidden");
     }
 
+    function cellKey(ix, iy, iz) {
+      return `${ix}|${iy}|${iz}`;
+    }
+
+    function updateOptionsPanel() {
+      toolPanel.classList.toggle("collapsed", optionsCollapsed);
+      optionsToggleBtn.setAttribute("aria-label", optionsCollapsed ? "Expand options" : "Minimize options");
+      optionsToggleBtn.setAttribute("title", optionsCollapsed ? "Expand options" : "Minimize options");
+      optionsToggleIcon.innerHTML = optionsCollapsed
+        ? '<path d="M9 6l6 6-6 6"></path>'
+        : '<path d="M6 9l6 6 6-6"></path>';
+    }
+
     function updateControlMode() {
       if (!controls) return;
 
+      controls.enabled = !addMode;
       controls.mouseButtons.LEFT = panMode ? THREE.MOUSE.PAN : THREE.MOUSE.ROTATE;
       controls.mouseButtons.RIGHT = panMode ? THREE.MOUSE.ROTATE : THREE.MOUSE.PAN;
 
       handToolBtn.classList.toggle("active", panMode);
-      canvasWrap.classList.toggle("pan-mode", panMode);
+      addCubeBtn.classList.toggle("active", addMode);
+      canvasWrap.classList.toggle("pan-mode", panMode && !addMode);
+      canvasWrap.classList.toggle("add-mode", addMode);
     }
 
     function zoomBy(delta) {
@@ -794,6 +859,9 @@
       canvasWrap.innerHTML = "";
       canvasWrap.appendChild(renderer.domElement);
 
+      raycaster = new THREE.Raycaster();
+      pointer = new THREE.Vector2();
+
       controls = new OrbitControls(camera, renderer.domElement);
       controls.enableDamping = true;
       controls.dampingFactor = 0.06;
@@ -824,6 +892,14 @@
 
       floorGroup = createFloor();
       scene.add(floorGroup);
+
+      cubesGroup = new THREE.Group();
+      pickGroup = new THREE.Group();
+      scene.add(cubesGroup);
+      scene.add(pickGroup);
+
+      canvasWrap.addEventListener("pointermove", onCanvasPointerMove);
+      canvasWrap.addEventListener("click", onCanvasClick);
 
       window.addEventListener("resize", onResize);
     }
@@ -877,16 +953,28 @@
       return new THREE.LineSegments(geometry, material);
     }
 
+    function disposeObject(obj) {
+      if (!obj) return;
+      if (obj.geometry) obj.geometry.dispose();
+      if (obj.material) {
+        if (Array.isArray(obj.material)) {
+          obj.material.forEach((mat) => mat.dispose());
+        } else {
+          obj.material.dispose();
+        }
+      }
+    }
+
+    function clearGroup(group) {
+      while (group.children.length) {
+        const child = group.children.pop();
+        disposeObject(child);
+      }
+    }
+
     function disposeGroup(group) {
       group.traverse((obj) => {
-        if (obj.geometry) obj.geometry.dispose();
-        if (obj.material) {
-          if (Array.isArray(obj.material)) {
-            obj.material.forEach((mat) => mat.dispose());
-          } else {
-            obj.material.dispose();
-          }
-        }
+        disposeObject(obj);
       });
     }
 
@@ -901,11 +989,155 @@
       controls.update();
     }
 
+    function rebuildPickVolumes(xCells, yCells, zCells, spacing, offset) {
+      clearGroup(pickGroup);
+
+      const pickGeometry = new THREE.BoxGeometry(spacing, spacing, spacing);
+
+      for (let ix = 0; ix < xCells; ix++) {
+        for (let iy = 0; iy < yCells; iy++) {
+          for (let iz = 0; iz < zCells; iz++) {
+            const material = new THREE.MeshBasicMaterial({
+              transparent: true,
+              opacity: 0,
+              depthWrite: false
+            });
+
+            const mesh = new THREE.Mesh(pickGeometry.clone(), material);
+            mesh.position.set(
+              offset.x + (ix + 0.5) * spacing,
+              offset.y + (iz + 0.5) * spacing,
+              offset.z + (iy + 0.5) * spacing
+            );
+            mesh.userData = { ix, iy, iz };
+            pickGroup.add(mesh);
+          }
+        }
+      }
+    }
+
+    function rebuildFilledCubes(xCells, yCells, zCells, spacing, offset) {
+      clearGroup(cubesGroup);
+      fillMeshes.clear();
+
+      const cubeSize = spacing * 0.82;
+      const cubeGeometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
+
+      for (let ix = 0; ix < xCells; ix++) {
+        for (let iy = 0; iy < yCells; iy++) {
+          for (let iz = 0; iz < zCells; iz++) {
+            // leave empty by default
+          }
+        }
+      }
+
+      cubesGroup.userData = { cubeGeometry, spacing, offset };
+    }
+
+    function addCubeAt(ix, iy, iz) {
+      const key = cellKey(ix, iy, iz);
+      if (fillMeshes.has(key)) return;
+
+      const { cubeGeometry, spacing, offset } = cubesGroup.userData;
+      const material = new THREE.MeshPhysicalMaterial({
+        color: 0x7be5ff,
+        emissive: 0x1a4d63,
+        emissiveIntensity: 0.35,
+        roughness: 0.2,
+        metalness: 0.08,
+        transmission: 0.06,
+        transparent: true,
+        opacity: 0.92,
+        clearcoat: 1,
+        clearcoatRoughness: 0.12
+      });
+
+      const mesh = new THREE.Mesh(cubeGeometry, material);
+      mesh.position.set(
+        offset.x + (ix + 0.5) * spacing,
+        offset.y + (iz + 0.5) * spacing,
+        offset.z + (iy + 0.5) * spacing
+      );
+
+      cubesGroup.add(mesh);
+      fillMeshes.set(key, mesh);
+    }
+
+    function removeCubeAt(ix, iy, iz) {
+      const key = cellKey(ix, iy, iz);
+      const mesh = fillMeshes.get(key);
+      if (!mesh) return;
+
+      cubesGroup.remove(mesh);
+      disposeObject(mesh);
+      fillMeshes.delete(key);
+    }
+
+    function toggleCubeAt(ix, iy, iz) {
+      const key = cellKey(ix, iy, iz);
+      if (fillMeshes.has(key)) {
+        removeCubeAt(ix, iy, iz);
+      } else {
+        addCubeAt(ix, iy, iz);
+      }
+    }
+
+    function setHoverMesh(mesh) {
+      if (hoverMesh && hoverMesh.material) {
+        hoverMesh.material.opacity = 0;
+      }
+
+      hoverMesh = mesh || null;
+
+      if (hoverMesh && addMode) {
+        hoverMesh.material.opacity = 0.12;
+        hoverMesh.material.color = new THREE.Color(0x73e8ff);
+      }
+    }
+
+    function getIntersectionsFromEvent(event) {
+      if (!renderer || !camera || !pickGroup.children.length) return [];
+
+      const rect = renderer.domElement.getBoundingClientRect();
+      pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+      raycaster.setFromCamera(pointer, camera);
+      return raycaster.intersectObjects(pickGroup.children, false);
+    }
+
+    function onCanvasPointerMove(event) {
+      if (!addMode) {
+        setHoverMesh(null);
+        return;
+      }
+
+      const intersections = getIntersectionsFromEvent(event);
+      if (intersections.length) {
+        setHoverMesh(intersections[0].object);
+      } else {
+        setHoverMesh(null);
+      }
+    }
+
+    function onCanvasClick(event) {
+      if (!addMode) return;
+
+      const intersections = getIntersectionsFromEvent(event);
+      if (!intersections.length) return;
+
+      const cell = intersections[0].object.userData;
+      toggleCubeAt(cell.ix, cell.iy, cell.iz);
+    }
+
     function buildLattice(xCells, yCells, zCells) {
       if (gridGroup) {
         disposeGroup(gridGroup);
         scene.remove(gridGroup);
       }
+
+      setHoverMesh(null);
+      clearGroup(cubesGroup);
 
       const spacing = 1.45;
 
@@ -921,7 +1153,6 @@
       const yLines = yCells + 1;
       const zLines = zCells + 1;
 
-      // x lines: width
       for (let yi = 0; yi < yLines; yi++) {
         for (let zi = 0; zi < zLines; zi++) {
           const yPos = yi * spacing;
@@ -935,7 +1166,6 @@
         }
       }
 
-      // y lines: length
       for (let xi = 0; xi < xLines; xi++) {
         for (let zi = 0; zi < zLines; zi++) {
           const xPos = xi * spacing;
@@ -949,7 +1179,6 @@
         }
       }
 
-      // z lines: height
       for (let xi = 0; xi < xLines; xi++) {
         for (let yi = 0; yi < yLines; yi++) {
           const xPos = xi * spacing;
@@ -983,10 +1212,19 @@
       boxEdges.position.set(widthX / 2, heightZ / 2, lengthY / 2);
       group.add(boxEdges);
 
-      group.position.set(-widthX / 2, -heightZ / 2, -lengthY / 2);
+      const offset = {
+        x: -widthX / 2,
+        y: -heightZ / 2,
+        z: -lengthY / 2
+      };
+
+      group.position.set(offset.x, offset.y, offset.z);
 
       gridGroup = group;
       scene.add(gridGroup);
+
+      rebuildPickVolumes(xCells, yCells, zCells, spacing, offset);
+      rebuildFilledCubes(xCells, yCells, zCells, spacing, offset);
 
       fitCamera(xCells, yCells, zCells, spacing);
       gridStats.textContent = `x ${xCells} · y ${yCells} · z ${zCells}`;
@@ -1037,8 +1275,23 @@
       }
     });
 
+    addCubeBtn.addEventListener("click", () => {
+      addMode = !addMode;
+      if (addMode) {
+        panMode = false;
+      }
+      if (!addMode) {
+        setHoverMesh(null);
+      }
+      updateControlMode();
+    });
+
     handToolBtn.addEventListener("click", () => {
       panMode = !panMode;
+      if (panMode) {
+        addMode = false;
+        setHoverMesh(null);
+      }
       updateControlMode();
     });
 
@@ -1050,16 +1303,13 @@
       zoomBy(-0.18);
     });
 
-    backBtn.addEventListener("click", () => {
-      showSetup();
-    });
-
-    resetViewBtn.addEventListener("click", () => {
-      if (!renderer) return;
-      buildLattice(currentDims.x, currentDims.y, currentDims.z);
+    optionsToggleBtn.addEventListener("click", () => {
+      optionsCollapsed = !optionsCollapsed;
+      updateOptionsPanel();
     });
 
     viewerScreen.classList.add("hidden");
+    updateOptionsPanel();
   </script>
 </body>
 </html>

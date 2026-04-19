@@ -6,384 +6,54 @@
   <title>Spatial Grid</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <style>
-    :root {
-      --bg: #050813;
-      --panel: rgba(9, 13, 22, 0.78);
-      --panel-strong: rgba(10, 14, 24, 0.88);
-      --border: rgba(255, 255, 255, 0.08);
-      --text: #f8fbff;
-      --muted: #91a3bf;
-      --cyan: #73e8ff;
-      --violet: #9b84ff;
-      --line: rgba(147, 222, 255, 0.34);
-      --line-strong: rgba(220, 232, 255, 0.52);
-      --shadow: 0 30px 80px rgba(0, 0, 0, 0.42);
-    }
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="./styles.css" />
 
-    * {
-      box-sizing: border-box;
-    }
-
-    html, body {
-      margin: 0;
-      width: 100%;
-      height: 100%;
-    }
-
-    body {
-      overflow: hidden;
-      font-family: "Inter", sans-serif;
-      color: var(--text);
-      background:
-        radial-gradient(circle at 16% 15%, rgba(115, 232, 255, 0.10), transparent 26%),
-        radial-gradient(circle at 84% 82%, rgba(155, 132, 255, 0.11), transparent 30%),
-        linear-gradient(180deg, #07101c 0%, #04070f 100%);
-    }
-
-    .noise {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      opacity: 0.035;
-      background-image:
-        linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px);
-      background-size: 4px 4px;
-      mask-image: radial-gradient(circle at center, black 34%, transparent 100%);
-    }
-
-    .orb {
-      position: fixed;
-      border-radius: 999px;
-      filter: blur(110px);
-      opacity: 0.18;
-      pointer-events: none;
-    }
-
-    .orb-a {
-      width: 26rem;
-      height: 26rem;
-      top: -9rem;
-      left: -9rem;
-      background: #35dcff;
-    }
-
-    .orb-b {
-      width: 28rem;
-      height: 28rem;
-      right: -10rem;
-      bottom: -11rem;
-      background: #7b61ff;
-    }
-
-    .app {
-      position: relative;
-      width: 100vw;
-      height: 100vh;
-    }
-
-    .setup-screen,
-    .viewer-screen {
-      position: absolute;
-      inset: 0;
-    }
-
-    .setup-screen {
-      z-index: 3;
-      display: grid;
-      place-items: center;
-      padding: 24px;
-      transition: opacity 0.35s ease, transform 0.35s ease;
-    }
-
-    .setup-screen.hidden {
-      opacity: 0;
-      transform: scale(0.985);
-      pointer-events: none;
-    }
-
-    .setup-card {
-      width: min(720px, 100%);
-      padding: 34px;
-      border-radius: 30px;
-      background: linear-gradient(180deg, rgba(13, 18, 30, 0.88), rgba(7, 10, 18, 0.84));
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(24px);
-    }
-
-    .eyebrow {
-      display: inline-flex;
-      padding: 8px 12px;
-      border-radius: 999px;
-      background: rgba(115, 232, 255, 0.08);
-      border: 1px solid rgba(115, 232, 255, 0.16);
-      color: #cff8ff;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-    }
-
-    h1 {
-      margin: 18px 0 12px;
-      font-size: clamp(2.6rem, 6vw, 5rem);
-      line-height: 0.95;
-      letter-spacing: -0.055em;
-    }
-
-    .lead {
-      margin: 0;
-      color: var(--muted);
-      font-size: 1.05rem;
-      line-height: 1.7;
-      max-width: 620px;
-    }
-
-    .grid-form {
-      margin-top: 28px;
-    }
-
-    .field-row {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-    }
-
-    .field {
-      display: grid;
-      gap: 8px;
-      padding: 16px;
-      border-radius: 22px;
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.05);
-    }
-
-    .field label {
-      font-size: 0.95rem;
-      font-weight: 700;
-    }
-
-    .field span {
-      font-size: 0.82rem;
-      color: var(--muted);
-    }
-
-    .field input {
-      height: 56px;
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,0.08);
-      background: rgba(4, 8, 16, 0.92);
-      color: var(--text);
-      padding: 0 14px;
-      font-size: 1rem;
-      outline: none;
-    }
-
-    .field input:focus {
-      border-color: rgba(115, 232, 255, 0.68);
-      box-shadow: 0 0 0 4px rgba(115, 232, 255, 0.10);
-    }
-
-    .generate-btn,
-    .ghost-btn {
-      font: inherit;
-      cursor: pointer;
-      transition: transform 0.18s ease, opacity 0.18s ease, background 0.18s ease;
-    }
-
-    .generate-btn:hover,
-    .ghost-btn:hover {
-      transform: translateY(-1px);
-    }
-
-    .generate-btn {
-      margin-top: 18px;
-      width: 100%;
-      height: 58px;
-      border: 0;
-      border-radius: 18px;
-      font-weight: 800;
-      color: #08111d;
-      background: linear-gradient(135deg, var(--cyan), var(--violet));
-      box-shadow: 0 18px 38px rgba(115, 232, 255, 0.16);
-    }
-
-    .viewer-screen {
-      z-index: 1;
-      overflow: hidden;
-      background:
-        radial-gradient(circle at 50% 52%, rgba(115, 232, 255, 0.05), transparent 30%),
-        linear-gradient(180deg, #050914 0%, #04070f 100%);
-    }
-
-    .viewer-screen.hidden {
-      display: none;
-    }
-
-    .hud {
-      position: absolute;
-      top: 18px;
-      left: 18px;
-      right: 18px;
-      z-index: 5;
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 12px;
-      pointer-events: none;
-    }
-
-    .hud-left {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .hud-right {
-      display: flex;
-      gap: 10px;
-    }
-
-    .pill,
-    .hint,
-    .ghost-btn {
-      pointer-events: auto;
-    }
-
-    .pill {
-      display: inline-flex;
-      width: fit-content;
-      padding: 10px 14px;
-      border-radius: 999px;
-      background: rgba(9, 13, 22, 0.8);
-      border: 1px solid var(--border);
-      backdrop-filter: blur(14px);
-      font-weight: 700;
-    }
-
-    .hint {
-      padding-left: 4px;
-      color: var(--muted);
-      font-size: 0.92rem;
-    }
-
-    .ghost-btn {
-      height: 44px;
-      padding: 0 16px;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      background: rgba(10, 14, 24, 0.78);
-      color: var(--text);
-      backdrop-filter: blur(14px);
-    }
-
-    .viewport {
-      position: absolute;
-      inset: 0;
-      perspective: 2200px;
-      perspective-origin: 50% 50%;
-      overflow: hidden;
-      cursor: grab;
-      user-select: none;
-      touch-action: none;
-    }
-
-    .viewport.dragging {
-      cursor: grabbing;
-    }
-
-    .scene {
-      position: absolute;
-      inset: 0;
-      transform-style: preserve-3d;
-    }
-
-    .grid-root {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform-style: preserve-3d;
-      will-change: transform;
-    }
-
-    .line {
-      position: absolute;
-      left: 0;
-      top: 0;
-      transform-origin: 0 50%;
-      height: 1.5px;
-      border-radius: 999px;
-      background: var(--line);
-      box-shadow: 0 0 10px rgba(115, 232, 255, 0.10);
-    }
-
-    .line.boundary {
-      height: 2px;
-      background: var(--line-strong);
-      box-shadow: 0 0 12px rgba(220, 232, 255, 0.14);
-    }
-
-    @media (max-width: 760px) {
-      .field-row {
-        grid-template-columns: 1fr;
-      }
-
-      .hud {
-        flex-wrap: wrap;
-      }
-
-      .hud-right {
-        width: 100%;
-      }
-
-      .ghost-btn {
-        flex: 1;
-      }
-
-      .setup-card {
-        padding: 24px;
-      }
-
-      h1 {
-        font-size: 2.8rem;
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.184.0/examples/jsm/"
       }
     }
-  </style>
+  </script>
 </head>
 <body>
+  <div class="bg-orb orb-a"></div>
+  <div class="bg-orb orb-b"></div>
   <div class="noise"></div>
-  <div class="orb orb-a"></div>
-  <div class="orb orb-b"></div>
 
-  <main class="app">
+  <main class="app-shell">
     <section id="setupScreen" class="setup-screen">
       <div class="setup-card">
         <div class="eyebrow">Spatial Grid Builder</div>
-        <h1>Build a real 3D grid.</h1>
-        <p class="lead">Choose X, Y, and Z, then generate a draggable wireframe lattice.</p>
+        <h1>Build a true 3D grid.</h1>
+        <p class="lead">
+          Choose X, Y, and Z dimensions, then generate a real draggable wireframe lattice.
+        </p>
 
         <form id="gridForm" class="grid-form">
           <div class="field-row">
-            <div class="field">
-              <label for="xInput">X</label>
+            <label class="field">
+              <span class="field-label">X</span>
               <input id="xInput" type="number" min="1" value="6" />
-              <span>Width</span>
-            </div>
+              <span class="field-meta">Width</span>
+            </label>
 
-            <div class="field">
-              <label for="yInput">Y</label>
+            <label class="field">
+              <span class="field-label">Y</span>
               <input id="yInput" type="number" min="1" value="5" />
-              <span>Height</span>
-            </div>
+              <span class="field-meta">Height</span>
+            </label>
 
-            <div class="field">
-              <label for="zInput">Z</label>
+            <label class="field">
+              <span class="field-label">Z</span>
               <input id="zInput" type="number" min="1" value="4" />
-              <span>Depth</span>
-            </div>
+              <span class="field-meta">Depth</span>
+            </label>
           </div>
 
           <button class="generate-btn" type="submit">Generate Grid</button>
@@ -395,7 +65,7 @@
       <div class="hud">
         <div class="hud-left">
           <div class="pill" id="gridStats">6 × 5 × 4</div>
-          <div class="hint">Drag to rotate · Scroll to zoom</div>
+          <div class="hint">Drag to rotate · Scroll to zoom · Right-drag to pan</div>
         </div>
 
         <div class="hud-right">
@@ -404,199 +74,10 @@
         </div>
       </div>
 
-      <div id="viewport" class="viewport">
-        <div id="scene" class="scene">
-          <div id="gridRoot" class="grid-root"></div>
-        </div>
-      </div>
+      <div id="canvasWrap" class="canvas-wrap"></div>
     </section>
   </main>
 
-  <script>
-    const setupScreen = document.getElementById("setupScreen");
-    const viewerScreen = document.getElementById("viewerScreen");
-    const gridForm = document.getElementById("gridForm");
-    const xInput = document.getElementById("xInput");
-    const yInput = document.getElementById("yInput");
-    const zInput = document.getElementById("zInput");
-    const gridStats = document.getElementById("gridStats");
-    const viewport = document.getElementById("viewport");
-    const gridRoot = document.getElementById("gridRoot");
-    const backBtn = document.getElementById("backBtn");
-    const resetViewBtn = document.getElementById("resetViewBtn");
-
-    let rotationX = -30;
-    let rotationY = 42;
-    let scale = 1;
-    let dragging = false;
-    let lastX = 0;
-    let lastY = 0;
-    let currentDims = { x: 6, y: 5, z: 4 };
-
-    function sanitize(value) {
-      const n = Number(value);
-      if (Number.isNaN(n) || n < 1) return 1;
-      return Math.floor(n);
-    }
-
-    function showViewer() {
-      setupScreen.classList.add("hidden");
-      viewerScreen.classList.remove("hidden");
-    }
-
-    function showSetup() {
-      viewerScreen.classList.add("hidden");
-      setupScreen.classList.remove("hidden");
-    }
-
-    function applyTransform() {
-      gridRoot.style.transform =
-        `translate3d(-50%, -50%, 0) rotateX(${rotationX}deg) rotateY(${rotationY}deg) scale(${scale})`;
-    }
-
-    function makeLine(x, y, z, length, axis, boundary = false) {
-      const el = document.createElement("div");
-      el.className = boundary ? "line boundary" : "line";
-      el.style.width = `${length}px`;
-
-      if (axis === "x") {
-        el.style.transform = `translate3d(${x}px, ${y}px, ${z}px)`;
-      }
-
-      if (axis === "y") {
-        el.style.transform = `translate3d(${x}px, ${y}px, ${z}px) rotateZ(90deg)`;
-      }
-
-      if (axis === "z") {
-        el.style.transform = `translate3d(${x}px, ${y}px, ${z}px) rotateY(90deg)`;
-      }
-
-      return el;
-    }
-
-    function buildGrid(x, y, z) {
-      gridRoot.innerHTML = "";
-
-      const spacing = 52;
-      const width = Math.max(0, (x - 1) * spacing);
-      const height = Math.max(0, (y - 1) * spacing);
-      const depth = Math.max(0, (z - 1) * spacing);
-
-      const offsetX = -width / 2;
-      const offsetY = -height / 2;
-      const offsetZ = -depth / 2;
-
-      const frag = document.createDocumentFragment();
-
-      for (let yi = 0; yi < y; yi++) {
-        for (let zi = 0; zi < z; zi++) {
-          const isBoundary = (yi === 0 || yi === y - 1) && (zi === 0 || zi === z - 1);
-          frag.appendChild(
-            makeLine(offsetX, offsetY + yi * spacing, offsetZ + zi * spacing, width, "x", isBoundary)
-          );
-        }
-      }
-
-      for (let xi = 0; xi < x; xi++) {
-        for (let zi = 0; zi < z; zi++) {
-          const isBoundary = (xi === 0 || xi === x - 1) && (zi === 0 || zi === z - 1);
-          frag.appendChild(
-            makeLine(offsetX + xi * spacing, offsetY, offsetZ + zi * spacing, height, "y", isBoundary)
-          );
-        }
-      }
-
-      for (let xi = 0; xi < x; xi++) {
-        for (let yi = 0; yi < y; yi++) {
-          const isBoundary = (xi === 0 || xi === x - 1) && (yi === 0 || yi === y - 1);
-          frag.appendChild(
-            makeLine(offsetX + xi * spacing, offsetY + yi * spacing, offsetZ, depth, "z", isBoundary)
-          );
-        }
-      }
-
-      gridRoot.appendChild(frag);
-      gridStats.textContent = `${x} × ${y} × ${z}`;
-
-      const maxDim = Math.max(x, y, z);
-      scale = Math.max(0.44, Math.min(1.1, 8 / maxDim));
-      rotationX = -30;
-      rotationY = 42;
-      applyTransform();
-    }
-
-    gridForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-
-      const x = sanitize(xInput.value);
-      const y = sanitize(yInput.value);
-      const z = sanitize(zInput.value);
-
-      currentDims = { x, y, z };
-
-      xInput.value = x;
-      yInput.value = y;
-      zInput.value = z;
-
-      buildGrid(x, y, z);
-      showViewer();
-    });
-
-    backBtn.addEventListener("click", () => {
-      showSetup();
-    });
-
-    resetViewBtn.addEventListener("click", () => {
-      buildGrid(currentDims.x, currentDims.y, currentDims.z);
-    });
-
-    viewport.addEventListener("pointerdown", (e) => {
-      dragging = true;
-      lastX = e.clientX;
-      lastY = e.clientY;
-      viewport.classList.add("dragging");
-      viewport.setPointerCapture(e.pointerId);
-    });
-
-    viewport.addEventListener("pointermove", (e) => {
-      if (!dragging) return;
-
-      const dx = e.clientX - lastX;
-      const dy = e.clientY - lastY;
-
-      lastX = e.clientX;
-      lastY = e.clientY;
-
-      rotationY += dx * 0.42;
-      rotationX -= dy * 0.34;
-      rotationX = Math.max(-80, Math.min(80, rotationX));
-      applyTransform();
-    });
-
-    function endDrag(e) {
-      dragging = false;
-      viewport.classList.remove("dragging");
-      try {
-        viewport.releasePointerCapture(e.pointerId);
-      } catch {}
-    }
-
-    viewport.addEventListener("pointerup", endDrag);
-    viewport.addEventListener("pointercancel", endDrag);
-    viewport.addEventListener("pointerleave", () => {
-      dragging = false;
-      viewport.classList.remove("dragging");
-    });
-
-    viewport.addEventListener("wheel", (e) => {
-      e.preventDefault();
-      const nextScale = scale - e.deltaY * 0.001;
-      scale = Math.max(0.22, Math.min(2.2, nextScale));
-      applyTransform();
-    }, { passive: false });
-
-    viewerScreen.classList.add("hidden");
-    applyTransform();
-  </script>
+  <script type="module" src="./app.js"></script>
 </body>
 </html>

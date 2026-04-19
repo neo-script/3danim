@@ -559,9 +559,11 @@
       direction.subVectors(camera.position, controls.target).normalize();
 
       const distance = camera.position.distanceTo(controls.target);
-      const moveAmount = Math.max(0.6, distance * delta);
+      const moveAmount = Math.max(0.6, distance * Math.abs(delta));
+      const nextDistance = delta > 0
+        ? Math.max(controls.minDistance, distance - moveAmount)
+        : Math.min(controls.maxDistance, distance + moveAmount);
 
-      const nextDistance = Math.max(controls.minDistance, Math.min(controls.maxDistance, distance + moveAmount));
       camera.position.copy(controls.target).addScaledVector(direction, nextDistance);
       controls.update();
     }
@@ -828,11 +830,11 @@
     });
 
     zoomInBtn.addEventListener("click", () => {
-      zoomBy(-0.18);
+      zoomBy(0.18);
     });
 
     zoomOutBtn.addEventListener("click", () => {
-      zoomBy(0.18);
+      zoomBy(-0.18);
     });
 
     backBtn.addEventListener("click", () => {

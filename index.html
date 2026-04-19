@@ -1129,32 +1129,34 @@
       return raycaster.intersectObjects(pickGroup.children, false);
     }
 
-    function updateSelectionBox() {
-      const left = Math.min(selectionStart.x, selectionEnd.x);
-      const top = Math.min(selectionStart.y, selectionEnd.y);
-      const width = Math.abs(selectionEnd.x - selectionStart.x);
-      const height = Math.abs(selectionEnd.y - selectionStart.y);
-
-      selectionBox.style.left = `${left}px`;
-      selectionBox.style.top = `${top}px`;
-      selectionBox.style.width = `${width}px`;
-      selectionBox.style.height = `${height}px`;
-      selectionBox.style.display = "block";
-    }
+  function updateSelectionBox() {
+    const rect = canvasWrap.getBoundingClientRect();
+  
+    const left = Math.min(selectionStart.x, selectionEnd.x) - rect.left;
+    const top = Math.min(selectionStart.y, selectionEnd.y) - rect.top;
+    const width = Math.abs(selectionEnd.x - selectionStart.x);
+    const height = Math.abs(selectionEnd.y - selectionStart.y);
+  
+    selectionBox.style.left = `${left}px`;
+    selectionBox.style.top = `${top}px`;
+    selectionBox.style.width = `${width}px`;
+    selectionBox.style.height = `${height}px`;
+    selectionBox.style.display = "block";
+  }
 
     function hideSelectionBox() {
       selectionBox.style.display = "none";
     }
 
-    function projectToScreen(position) {
-      const projected = position.clone().project(camera);
-      const rect = renderer.domElement.getBoundingClientRect();
-
-      return {
-        x: ((projected.x + 1) / 2) * rect.width,
-        y: ((-projected.y + 1) / 2) * rect.height
-      };
-    }
+  function projectToScreen(position) {
+    const projected = position.clone().project(camera);
+    const rect = renderer.domElement.getBoundingClientRect();
+  
+    return {
+      x: rect.left + ((projected.x + 1) / 2) * rect.width,
+      y: rect.top + ((-projected.y + 1) / 2) * rect.height
+    };
+  }
 
     function fillSelectionRect() {
       if (!pickGroup.children.length) return;
@@ -1173,14 +1175,15 @@
       }
     }
 
-    function onCanvasPointerMove(event) {
-      if (selectMode && selectionActive) {
-        selectionEnd.x = event.clientX;
-        selectionEnd.y = event.clientY;
-        draggedSelection = true;
-        updateSelectionBox();
-        return;
-      }
+  function onCanvasPointerMove(event) {
+    if (selectMode && selectionActive) {
+      event.preventDefault();
+      selectionEnd.x = event.clientX;
+      selectionEnd.y = event.clientY;
+      draggedSelection = true;
+      updateSelectionBox();
+      return;
+    }
 
       if (!addMode) {
         setHoverMesh(null);
@@ -1195,6 +1198,25 @@
       }
     }
 
+    function onCanvasPointerUp(event) {
+  if (!selectMode || !selectionActive) return;
+  if (event.button !== 0) return;
+
+  event.preventDefault();
+
+  selectionEnd.x = event.clientX;
+  selectionEnd.y = event.clientY;
+  updateSelectionBox();
+
+  if (draggedSelection) {
+    fillSelectionRect();
+  }
+
+  selectionActive = false;
+  draggedSelection = false;
+  hideSelectionBox();
+}
+
     function onCanvasPointerDown(event) {
       if (!selectMode) return;
       if (event.button !== 0) return;
@@ -1208,17 +1230,20 @@
       updateSelectionBox();
     }
 
-    function onCanvasPointerUp(event) {
-      if (!selectMode || !selectionActive) return;
-      if (event.button !== 0) return;
-
-      selectionEnd.x = event.clientX;
-      selectionEnd.y = event.clientY;
-      updateSelectionBox();
-
-      if (draggedSelection) {
-        fillSelectionRect();
-      }
+  function onCanvasPointerDown(event) {
+    if (!selectMode) return;
+    if (event.button !== 0) return;
+  
+    event.preventDefault();
+  
+    selectionActive = true;
+    draggedSelection = false;
+    selectionStart.x = event.clientX;
+    selectionStart.y = event.clientY;
+    selectionEnd.x = event.clientX;
+    selectionEnd.y = event.clientY;
+    updateSelectionBox();
+  }
 
       selectionActive = false;
       draggedSelection = false;

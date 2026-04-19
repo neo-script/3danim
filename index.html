@@ -102,8 +102,8 @@
 
     .setup-screen {
       z-index: 3;
-      display: grid;
-      place-items: center;
+      overflow-y: auto;
+      overflow-x: hidden;
       padding: 28px;
       transition: opacity 0.35s ease, transform 0.35s ease;
     }
@@ -116,6 +116,7 @@
 
     .setup-card {
       width: min(1080px, 100%);
+      margin: 0 auto;
       padding: 28px;
       border-radius: 32px;
       background: linear-gradient(180deg, rgba(13, 18, 30, 0.88), rgba(7, 10, 18, 0.84));
@@ -521,6 +522,10 @@
     }
 
     @media (max-width: 760px) {
+      .setup-screen {
+        padding: 16px;
+      }
+
       .hero-metrics {
         grid-template-columns: 1fr;
       }
@@ -551,16 +556,23 @@
       }
 
       .setup-card {
-        padding: 20px;
+        padding: 18px;
       }
 
       .hero-panel,
       .config-panel {
-        padding: 20px;
+        padding: 18px;
       }
 
       h1 {
         font-size: 3rem;
+      }
+    }
+
+    @media (max-height: 820px) {
+      .setup-screen {
+        padding-top: 18px;
+        padding-bottom: 18px;
       }
     }
   </style>
@@ -582,7 +594,7 @@
               <div class="brand-name">Kairo</div>
             </div>
 
-            <h1>Build spatial grids with real depth.</h1>
+            <h1>Build spatial grids with real scale.</h1>
             <p class="lead">
               Kairo lets you define a three-dimensional wireframe volume using width, length, and height — then inspect it from any angle in a true interactive 3D view.
             </p>
@@ -594,7 +606,7 @@
               </div>
               <div class="metric">
                 <span class="metric-label">Y Axis</span>
-                <div class="metric-value">Depth / Length</div>
+                <div class="metric-value">Length</div>
               </div>
               <div class="metric">
                 <span class="metric-label">Z Axis</span>
@@ -604,7 +616,7 @@
 
             <div class="axis-strip">
               <div class="axis-pill"><strong>X</strong> → left to right</div>
-              <div class="axis-pill"><strong>Y</strong> → forward to back</div>
+              <div class="axis-pill"><strong>Y</strong> → front to back</div>
               <div class="axis-pill"><strong>Z</strong> → bottom to top</div>
             </div>
           </div>
@@ -628,7 +640,7 @@
                 <div class="field">
                   <label for="yInput">Y</label>
                   <input id="yInput" type="number" min="1" value="5" />
-                  <span>Depth / length · forward to back · cell count</span>
+                  <span>Length · front to back · cell count</span>
                 </div>
 
                 <div class="field">
@@ -649,7 +661,7 @@
       <div class="hud">
         <div class="hud-left">
           <div class="pill" id="gridStats">X 6 · Y 5 · Z 4</div>
-          <div class="hint">Cell counts · X = width · Y = depth · Z = height</div>
+          <div class="hint">Cell counts · X = width · Y = length · Z = height</div>
         </div>
 
         <div class="hud-right">
@@ -880,9 +892,9 @@
 
     function fitCamera(xCells, yCells, zCells, spacing) {
       const width = Math.max(xCells * spacing, 1);
-      const depth = Math.max(yCells * spacing, 1);
+      const length = Math.max(yCells * spacing, 1);
       const height = Math.max(zCells * spacing, 1);
-      const maxDim = Math.max(width, depth, height);
+      const maxDim = Math.max(width, length, height);
 
       camera.position.set(maxDim * 1.55, maxDim * 1.25, maxDim * 1.6);
       controls.target.set(0, 0, 0);
@@ -898,7 +910,7 @@
       const spacing = 1.45;
 
       const widthX = xCells * spacing;
-      const depthY = yCells * spacing;
+      const lengthY = yCells * spacing;
       const heightZ = zCells * spacing;
 
       const innerVertices = [];
@@ -909,21 +921,21 @@
       const yLines = yCells + 1;
       const zLines = zCells + 1;
 
-      // X axis lines: width, varying depth and height
+      // X axis lines: width, varying length and height
       for (let yi = 0; yi < yLines; yi++) {
         for (let zi = 0; zi < zLines; zi++) {
-          const depthPos = yi * spacing;
+          const lengthPos = yi * spacing;
           const heightPos = zi * spacing;
           const target = (
             (yi === 0 || yi === yCells) &&
             (zi === 0 || zi === zCells)
           ) ? outerVertices : innerVertices;
 
-          target.push(0, heightPos, depthPos, widthX, heightPos, depthPos);
+          target.push(0, heightPos, lengthPos, widthX, heightPos, lengthPos);
         }
       }
 
-      // Y axis lines: depth, varying width and height
+      // Y axis lines: length, varying width and height
       for (let xi = 0; xi < xLines; xi++) {
         for (let zi = 0; zi < zLines; zi++) {
           const widthPos = xi * spacing;
@@ -933,21 +945,21 @@
             (zi === 0 || zi === zCells)
           ) ? outerVertices : innerVertices;
 
-          target.push(widthPos, heightPos, 0, widthPos, heightPos, depthY);
+          target.push(widthPos, heightPos, 0, widthPos, heightPos, lengthY);
         }
       }
 
-      // Z axis lines: height, varying width and depth
+      // Z axis lines: height, varying width and length
       for (let xi = 0; xi < xLines; xi++) {
         for (let yi = 0; yi < yLines; yi++) {
           const widthPos = xi * spacing;
-          const depthPos = yi * spacing;
+          const lengthPos = yi * spacing;
           const target = (
             (xi === 0 || xi === xCells) &&
             (yi === 0 || yi === yCells)
           ) ? outerVertices : innerVertices;
 
-          target.push(widthPos, 0, depthPos, widthPos, heightZ, depthPos);
+          target.push(widthPos, 0, lengthPos, widthPos, heightZ, lengthPos);
         }
       }
 
@@ -959,7 +971,7 @@
       const boxGeometry = new THREE.BoxGeometry(
         Math.max(widthX, 0.001),
         Math.max(heightZ, 0.001),
-        Math.max(depthY, 0.001)
+        Math.max(lengthY, 0.001)
       );
       const edgeGeometry = new THREE.EdgesGeometry(boxGeometry);
       const edgeMaterial = new THREE.LineBasicMaterial({
@@ -968,10 +980,10 @@
         opacity: 0.38
       });
       const boxEdges = new THREE.LineSegments(edgeGeometry, edgeMaterial);
-      boxEdges.position.set(widthX / 2, heightZ / 2, depthY / 2);
+      boxEdges.position.set(widthX / 2, heightZ / 2, lengthY / 2);
       group.add(boxEdges);
 
-      group.position.set(-widthX / 2, -heightZ / 2, -depthY / 2);
+      group.position.set(-widthX / 2, -heightZ / 2, -lengthY / 2);
 
       gridGroup = group;
       scene.add(gridGroup);

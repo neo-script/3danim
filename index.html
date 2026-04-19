@@ -594,30 +594,30 @@
               <div class="brand-name">Kairo</div>
             </div>
 
-            <h1>Build spatial grids with real scale.</h1>
+            <h1>Build box grids with real scale.</h1>
             <p class="lead">
-              Kairo lets you define a three-dimensional wireframe volume using width, length, and height — then inspect it from any angle in a true interactive 3D view.
+              Kairo uses the same box-style axis convention: x for width, y for length, and z for height — then renders the result as a true interactive 3D lattice.
             </p>
 
             <div class="hero-metrics">
               <div class="metric">
-                <span class="metric-label">X Axis</span>
+                <span class="metric-label">x</span>
                 <div class="metric-value">Width</div>
               </div>
               <div class="metric">
-                <span class="metric-label">Y Axis</span>
+                <span class="metric-label">y</span>
                 <div class="metric-value">Length</div>
               </div>
               <div class="metric">
-                <span class="metric-label">Z Axis</span>
+                <span class="metric-label">z</span>
                 <div class="metric-value">Height</div>
               </div>
             </div>
 
             <div class="axis-strip">
-              <div class="axis-pill"><strong>X</strong> → left to right</div>
-              <div class="axis-pill"><strong>Y</strong> → front to back</div>
-              <div class="axis-pill"><strong>Z</strong> → bottom to top</div>
+              <div class="axis-pill"><strong>x</strong> = width of box</div>
+              <div class="axis-pill"><strong>y</strong> = length of box</div>
+              <div class="axis-pill"><strong>z</strong> = height of box</div>
             </div>
           </div>
 
@@ -625,28 +625,28 @@
             <div class="config-header">
               <div class="config-title">New grid</div>
               <div class="config-copy">
-                Set the number of grid cells for each axis. If you enter 6, that axis will contain 6 full grid spaces.
+                Set the number of full grid spaces for each axis. If you enter 6, that axis will contain 6 full cells.
               </div>
             </div>
 
             <form id="gridForm" class="grid-form">
               <div class="field-row">
                 <div class="field">
-                  <label for="xInput">X</label>
+                  <label for="xInput">x</label>
                   <input id="xInput" type="number" min="1" value="6" />
-                  <span>Width · left to right · cell count</span>
+                  <span>Width of box · cell count</span>
                 </div>
 
                 <div class="field">
-                  <label for="yInput">Y</label>
+                  <label for="yInput">y</label>
                   <input id="yInput" type="number" min="1" value="5" />
-                  <span>Length · front to back · cell count</span>
+                  <span>Length of box · cell count</span>
                 </div>
 
                 <div class="field">
-                  <label for="zInput">Z</label>
+                  <label for="zInput">z</label>
                   <input id="zInput" type="number" min="1" value="4" />
-                  <span>Height · bottom to top · cell count</span>
+                  <span>Height of box · cell count</span>
                 </div>
               </div>
 
@@ -660,8 +660,8 @@
     <section id="viewerScreen" class="viewer-screen hidden">
       <div class="hud">
         <div class="hud-left">
-          <div class="pill" id="gridStats">X 6 · Y 5 · Z 4</div>
-          <div class="hint">Cell counts · X = width · Y = length · Z = height</div>
+          <div class="pill" id="gridStats">x 6 · y 5 · z 4</div>
+          <div class="hint">Cell counts · x = width · y = length · z = height</div>
         </div>
 
         <div class="hud-right">
@@ -921,45 +921,45 @@
       const yLines = yCells + 1;
       const zLines = zCells + 1;
 
-      // X axis lines: width, varying length and height
+      // x lines: width
       for (let yi = 0; yi < yLines; yi++) {
         for (let zi = 0; zi < zLines; zi++) {
-          const lengthPos = yi * spacing;
-          const heightPos = zi * spacing;
+          const yPos = yi * spacing;
+          const zPos = zi * spacing;
           const target = (
             (yi === 0 || yi === yCells) &&
             (zi === 0 || zi === zCells)
           ) ? outerVertices : innerVertices;
 
-          target.push(0, heightPos, lengthPos, widthX, heightPos, lengthPos);
+          target.push(0, zPos, yPos, widthX, zPos, yPos);
         }
       }
 
-      // Y axis lines: length, varying width and height
+      // y lines: length
       for (let xi = 0; xi < xLines; xi++) {
         for (let zi = 0; zi < zLines; zi++) {
-          const widthPos = xi * spacing;
-          const heightPos = zi * spacing;
+          const xPos = xi * spacing;
+          const zPos = zi * spacing;
           const target = (
             (xi === 0 || xi === xCells) &&
             (zi === 0 || zi === zCells)
           ) ? outerVertices : innerVertices;
 
-          target.push(widthPos, heightPos, 0, widthPos, heightPos, lengthY);
+          target.push(xPos, zPos, 0, xPos, zPos, lengthY);
         }
       }
 
-      // Z axis lines: height, varying width and length
+      // z lines: height
       for (let xi = 0; xi < xLines; xi++) {
         for (let yi = 0; yi < yLines; yi++) {
-          const widthPos = xi * spacing;
-          const lengthPos = yi * spacing;
+          const xPos = xi * spacing;
+          const yPos = yi * spacing;
           const target = (
             (xi === 0 || xi === xCells) &&
             (yi === 0 || yi === yCells)
           ) ? outerVertices : innerVertices;
 
-          target.push(widthPos, 0, lengthPos, widthPos, heightZ, lengthPos);
+          target.push(xPos, 0, yPos, xPos, heightZ, yPos);
         }
       }
 
@@ -989,7 +989,7 @@
       scene.add(gridGroup);
 
       fitCamera(xCells, yCells, zCells, spacing);
-      gridStats.textContent = `X ${xCells} · Y ${yCells} · Z ${zCells}`;
+      gridStats.textContent = `x ${xCells} · y ${yCells} · z ${zCells}`;
     }
 
     function onResize() {
